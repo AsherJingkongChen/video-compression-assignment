@@ -50,7 +50,9 @@ class BT709:
         return linalg.inv(BT709.TRANS_RGB_TO_YCbCr())
 
     @staticmethod
-    def TRANS_AND_OFFSET_RGB_A_TO_D() -> tuple[typing.NDArray[float32], typing.NDArray[float32]]:
+    def TRANS_AND_OFFSET_RGB_A_TO_D() -> (
+        tuple[typing.NDArray[float32], typing.NDArray[float32]]
+    ):
         """
         Arguments for transformation from the analog RGB to digital RGB color space
 
@@ -73,7 +75,9 @@ class BT709:
         return (transform, offset)
 
     @staticmethod
-    def TRANS_AND_OFFSET_RGB_D_TO_A() -> tuple[typing.NDArray[float32], typing.NDArray[float32]]:
+    def TRANS_AND_OFFSET_RGB_D_TO_A() -> (
+        tuple[typing.NDArray[float32], typing.NDArray[float32]]
+    ):
         """
         Arguments for transformation from the digital RGB to analog RGB color space
 
@@ -91,8 +95,8 @@ class BT709:
         """
 
         transform, offset = BT709.TRANS_AND_OFFSET_RGB_A_TO_D()
-        transform = (1 / transform)
-        offset = (-offset * transform)
+        transform = 1 / transform
+        offset = -offset * transform
         return (transform, offset)
 
     @staticmethod
@@ -143,6 +147,6 @@ class BT709:
         """
 
         transform, offset = BT709.TRANS_AND_OFFSET_YCbCr_A_TO_D()
-        transform = (1 / transform)
+        transform = 1 / transform
         offset = -offset * transform
         return (transform, offset)
