@@ -17,9 +17,16 @@ class H273:
     """
 
     _is_full_range: bool
+    _is_rgb_gamma_corrected: bool
 
-    def __init__(self) -> None:
-        self.set_full_range()
+    def __init__(
+        self,
+        *,
+        full_range: bool = False,
+        rgb_gamma_corrected: bool = True,
+    ) -> None:
+        self.set_full_range(full_range)
+        self.set_rgb_gamma_corrected(rgb_gamma_corrected)
 
     def set_full_range(self, flag: bool = False) -> "H273":
         """
@@ -53,6 +60,43 @@ class H273:
 
         return self._is_full_range
 
+    def set_rgb_gamma_corrected(self, flag: bool = True) -> "H273":
+        """
+        Set the RGB gamma-corrected flag
+
+        ## Details
+        - This flag specifies whether the input RGB values
+          are assumed to be gamma-corrected.
+        - When not specified, the value defaults to `True`.
+        - *Case for `False` is not implemented yet*
+
+        ## References
+        - See Section 8.2 of Rec. ITU-T H.273.
+        """
+
+        if not flag:
+            raise NotImplementedError("Case for `False` is not implemented yet")
+
+        self._is_rgb_gamma_corrected = flag
+        return self
+
+    @property
+    def is_rgb_gamma_corrected(self) -> bool:
+        """
+        Get the RGB gamma-corrected flag
+
+        ## Details
+        - This flag specifies whether the input RGB values
+          are assumed to be gamma-corrected.
+        - When not specified, the value defaults to `True`.
+        - *Case for `False` is not implemented yet*
+
+        ## References
+        - See Section 8.2 of Rec. ITU-T H.273.
+        """
+
+        return self._is_rgb_gamma_corrected
+
     def quantize_rgb(
         self,
         values: Iterable[Tuple[float32, float32, float32]],
@@ -63,7 +107,7 @@ class H273:
 
         ## Parameters
         - `values`
-            - Gamma-corrected RGB values in the range of `0.0` to `1.0`
+            - Gamma-corrected RGB values in the range of `0.0` to `1.0` *[Section 8.3]*
         - `bit_depth`
             - Representation bit depth of the corresponding luma colour component signal
             - It should be greater than or equal to `8`
@@ -72,11 +116,13 @@ class H273:
         - Quantized RGB values (`NDArray[uintlike]`)
 
         ## References
-        - See Equation 20 to 22, Section 8 of Rec. ITU-T H.273.
+        - See Equation 20 to 22, 26 to 28, Section 8 of Rec. ITU-T H.273.
         """
 
         from numpy import array
 
+        if not self.is_rgb_gamma_corrected:
+            raise ValueError("The input RGB values are assumed to be gamma-corrected")
         if bit_depth < 8:
             raise ValueError("The bit depth should be greater than or equal to 8")
 
@@ -94,6 +140,41 @@ class H273:
 
         return clipped_values
 
+    def rgb_to_ypbpr(
+        self,
+        values: Iterable[Tuple[float32, float32, float32]],
+        kr: float32,
+        kb: float32,
+    ) -> NDArray[float32]:
+        """
+        Calculate the Y'PbPr values from the RGB values
+
+        ## Parameters
+        - `values`
+            - RGB values in the range of `0.0` to `1.0`
+        - `kr`
+            - Constant `Kr` computed from color primaries *[Table 4]*
+        - `kb`
+            - Constant `Kb` computed from color primaries *[Table 4]*
+
+        ## Returns
+        - Y'PbPr values (`NDArray[float32]`)
+
+        ## Details
+        - The implementation differs on whether the RGB values are gamma-corrected or not
+            - *Case for `False` is not implemented yet*
+
+        ## References
+        - See Equation 38 to 40, 59 to 68 Section 8 of Rec. ITU-T H.273.
+        """
+
+        from numpy import array
+
+        if self.is_rgb_gamma_corrected:
+            pass
+        else:
+            raise NotImplementedError("Case for `False` is not implemented yet")
+
     def clip(self, values: ArrayLike, bit_depth: int = 8) -> NDArray[uintlike]:
         """
         Clip the values within the specified bit depth
@@ -102,12 +183,15 @@ class H273:
         - `values`: Values to be clipped
         - `bit_depth`: Representation bit depth of the values
 
+        ## Returns
+        - Clipped values (`NDArray[uintlike]`)
+
         ## Details
         - Formula: `clip(x) = min(max(x, 0), ((1 << bit_depth) - 1))`
         - The values are casted into suitable unsigned integer types
 
         ## References
-        - See Section 5.4 (2), (3), (4) of Rec. ITU-T H.273.
+        - See Equation 2 to 4, Section 5.4 of Rec. ITU-T H.273.
         """
 
         from numpy import clip
