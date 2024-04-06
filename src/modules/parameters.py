@@ -1,146 +1,127 @@
-from numpy import float32, typing
+from numpy import float32, uint8, uint16, uint32, uint64, uint128, uint256
+from numpy.typing import ArrayLike, NDArray
+from typing import Iterable, Tuple, TypeAlias, Union
+
+uintlike: TypeAlias = Union[uint8, uint16, uint32, uint64, uint128, uint256]
 
 
-class BT709:
+class H273:
     """
-    Recommendation ITU-R BT.709-6
+    Recommendation ITU-T H.273
 
-    Parameter values for the HDTV standards for
-    production and international programme exchange
+    Coding-independent code points for
+    video signal type identification
+
+    ## References
+    - [ITU](https://www.itu.int/rec/T-REC-H.273-201612-S/en)
     """
 
-    def TRANS_RGB_TO_YCbCr(self) -> typing.NDArray[float32]:
+    _is_full_range: bool
+
+    def __init__(self) -> None:
+        self.set_full_range()
+
+    def set_full_range(self, flag: bool = False) -> "H273":
         """
-        Transformation matrix (`3x3`) from the analog RGB to analog YCbCr color space
+        Set the video full range flag
 
         ## Details
+        - This flag specifies the scaling and offset values applied
+          in association with the other coefficients.
+        - When not specified, the value defaults to `False`.
 
-        - Formula: `(Y, Cb, Cr) = T @ (R, G, B)`
-        - For more information, see Item 3.2 and 3.3 of Rec. ITU-R BT.709-6.
-          [(Link)](https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-6-201506-I!!PDF-E.pdf)
+        ## References
+        - See Section 8.3 of Rec. ITU-T H.273.
+        """
+
+        self._is_full_range = flag
+        return self
+
+    @property
+    def is_full_range(self) -> bool:
+        """
+        Get the video full range flag
+
+        ## Details
+        - This flag specifies the scaling and offset values applied
+          in association with the other coefficients.
+        - When not specified, the value defaults to `False`.
+
+        ## References
+        - See Section 8.3 of Rec. ITU-T H.273.
+        """
+
+        return self._is_full_range
+
+    def quantize_rgb(
+        self,
+        values: Iterable[Tuple[float32, float32, float32]],
+        bit_depth: int = 8,
+    ) -> NDArray[uintlike]:
+        """
+        Quantize the RGB values
+
+        ## Parameters
+        - `values`
+            - Gamma-corrected RGB values in the range of `0.0` to `1.0`
+        - `bit_depth`
+            - Representation bit depth of the corresponding luma colour component signal
+            - It should be greater than or equal to `8`
+
+        ## Returns
+        - Quantized RGB values (`NDArray[uintlike]`)
+
+        ## References
+        - See Equation 20 to 22, Section 8 of Rec. ITU-T H.273.
         """
 
         from numpy import array
 
-        return array(
-            [
-                [+0.2126 / 1.0000, +0.7152 / 1.0000, +0.0722 / 1.0000],
-                [-0.2126 / 1.8556, -0.7152 / 1.8556, +0.9278 / 1.8556],
-                [+0.7874 / 1.5748, -0.7152 / 1.5748, -0.0722 / 1.5748],
-            ],
-            dtype=float32,
-        )
+        if bit_depth < 8:
+            raise ValueError("The bit depth should be greater than or equal to 8")
 
-    def TRANS_YCbCr_TO_RGB(self) -> typing.NDArray[float32]:
+        bit_depth = int(bit_depth)
+        values = array(values, dtype=float32, ndmin=2)
+
+        if self.is_full_range:
+            scale = (1 << bit_depth) - 1
+            transformed_values = scale * values
+            clipped_values = self.clip(transformed_values, bit_depth)
+        else:
+            padding = 1 << (bit_depth - 8)
+            transformed_values = padding * (([219] * 3) * values + ([16] * 3))
+            clipped_values = self.clip(transformed_values, bit_depth)
+
+        return clipped_values
+
+    def clip(self, values: ArrayLike, bit_depth: int = 8) -> NDArray[uintlike]:
         """
-        Transformation matrix (`3x3`) from the analog YCbCr to analog RGB color space
+        Clip the values within the specified bit depth
+
+        ## Parameters
+        - `values`: Values to be clipped
+        - `bit_depth`: Representation bit depth of the values
 
         ## Details
+        - Formula: `clip(x) = min(max(x, 0), ((1 << bit_depth) - 1))`
+        - The values are casted into suitable unsigned integer types
 
-        - Formula: `(R, G, B) = T @ (Y, Cb, Cr)`
-        - This matrix is the inverse of `BT709.TRANS_RGB_TO_YCbCr()`.
-        - For more information, see Item 3.2 and 3.3 of Rec. ITU-R BT.709-6.
-          [(Link)](https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-6-201506-I!!PDF-E.pdf)
+        ## References
+        - See Section 5.4 (2), (3), (4) of Rec. ITU-T H.273.
         """
 
-        from numpy import linalg
+        from numpy import clip
 
-        return linalg.inv(self.TRANS_RGB_TO_YCbCr())
-
-    def TRANS_AND_OFFSET_RGB_A_TO_D(
-        self,
-    ) -> tuple[typing.NDArray[float32], typing.NDArray[float32]]:
-        """
-        Arguments for transformation from the analog RGB to digital RGB color space
-
-        ## Returns
-
-        1. Transformation vector `T` (`3x1`)
-        2. Offset vector `t` (`3x1`)
-
-        ## Details
-
-        - Formula: `(dR, dG, dB) = T * (aR, aG, aB) + t`
-        - Ranges: `aR, aG, aB ∈ [0.0, 1.0]` and `dR, dG, dB ∈ [16, 235]`
-        - For more information, see Item 3.4 and 4.6 of Rec. ITU-R BT.709-6.
-          [(Link)](https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-6-201506-I!!PDF-E.pdf)
-        """
-        from numpy import array
-
-        transform = array([219, 219, 219], dtype=float32)
-        offset = array([16, 16, 16], dtype=float32)
-        return (transform, offset)
-
-    def TRANS_AND_OFFSET_RGB_D_TO_A(
-        self,
-    ) -> tuple[typing.NDArray[float32], typing.NDArray[float32]]:
-        """
-        Arguments for transformation from the digital RGB to analog RGB color space
-
-        ## Returns
-
-        1. Transformation vector `T` (`3x1`)
-        2. Offset vector `t` (`3x1`)
-
-        ## Details
-
-        - Formula: `(aR, aG, aB) = T * (dR, dG, dB) - t`
-        - Ranges: `aR, aG, aB ∈ [0.0, 1.0]` and `dR, dG, dB ∈ [16, 235]`
-        - For more information, see Item 3.4 and 4.6 of Rec. ITU-R BT.709-6.
-          [(Link)](https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-6-201506-I!!PDF-E.pdf)
-        """
-
-        transform, offset = self.TRANS_AND_OFFSET_RGB_A_TO_D()
-        transform = 1 / transform
-        offset = -offset * transform
-        return (transform, offset)
-
-    def TRANS_AND_OFFSET_YCbCr_A_TO_D(
-        self,
-    ) -> tuple[typing.NDArray[float32], typing.NDArray[float32]]:
-        """
-        Arguments for transformation from the analog YCbCr to digital YCbCr color space
-
-        ## Returns
-
-        1. Transformation vector `T` (`3x1`)
-        2. Offset vector `t` (`3x1`)
-
-        ## Details
-
-        - Formula: `(dY, dCb, dCr) = T * (aY, aCb, aCr) + t`
-        - Ranges: `aY ∈ [0.0, 1.0], aCb, aCr ∈ [-0.5, +0.5]` and
-                  `dY ∈ [16, 235], dCb, dCr ∈ [16, 240]`
-        - For more information, see Item 3.4 and 4.6 of Rec. ITU-R BT.709-6.
-          [(Link)](https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-6-201506-I!!PDF-E.pdf)
-        """
-        from numpy import array
-
-        transform = array([219, 224, 224], dtype=float32)
-        offset = array([16, 128, 128], dtype=float32)
-        return (transform, offset)
-
-    def TRANS_AND_OFFSET_YCbCr_D_TO_A(
-        self,
-    ) -> tuple[typing.NDArray[float32], typing.NDArray[float32]]:
-        """
-        Arguments for transformation from the digital YCbCr to analog YCbCr color space
-
-        ## Returns
-
-        1. Transformation vector `T` (`3x1`)
-        2. Offset vector `t` (`3x1`)
-
-        ## Details
-
-        - Formula: `(dY, dCb, dCr) = T * (aY, aCb, aCr) + t`
-        - Ranges: `aY ∈ [0.0, 1.0], aCb, aCr ∈ [-0.5, +0.5]` and
-                  `dY ∈ [16, 235], dCb, dCr ∈ [16, 240]`
-        - For more information, see Item 3.4 and 4.6 of Rec. ITU-R BT.709-6.
-          [(Link)](https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-6-201506-I!!PDF-E.pdf)
-        """
-
-        transform, offset = self.TRANS_AND_OFFSET_YCbCr_A_TO_D()
-        transform = 1 / transform
-        offset = -offset * transform
-        return (transform, offset)
+        clipped_values = clip(values, 0, (1 << bit_depth) - 1)
+        if bit_depth <= 8:
+            return clipped_values.astype(uint8)
+        elif bit_depth <= 16:
+            return clipped_values.astype(uint16)
+        elif bit_depth <= 32:
+            return clipped_values.astype(uint32)
+        elif bit_depth <= 64:
+            return clipped_values.astype(uint64)
+        elif bit_depth <= 128:
+            return clipped_values.astype(uint128)
+        elif bit_depth <= 256:
+            return clipped_values.astype(uint256)
