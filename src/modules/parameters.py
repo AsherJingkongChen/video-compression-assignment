@@ -1,8 +1,8 @@
-from numpy import float32, uint8, uint16, uint32, uint64, uint128, uint256
+from numpy import float32, uint8, uint16, uint32, uint64
 from numpy.typing import ArrayLike, NDArray
 from typing import Iterable, Tuple, TypeAlias, Union
 
-uintlike: TypeAlias = Union[uint8, uint16, uint32, uint64, uint128, uint256]
+uintlike: TypeAlias = Union[uint8, uint16, uint32, uint64]
 
 
 class H273:
@@ -111,6 +111,7 @@ class H273:
         - `bit_depth`
             - Representation bit depth of the corresponding luma colour component signal
             - It should be greater than or equal to `8`
+            - The default value is `8`
 
         ## Returns
         - Quantized RGB values (`NDArray[uintlike]`)
@@ -127,7 +128,7 @@ class H273:
             raise ValueError("The bit depth should be greater than or equal to 8")
 
         bit_depth = int(bit_depth)
-        values = array(values, dtype=float32, ndmin=2)
+        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
 
         if self.is_full_range:
             scale = (1 << bit_depth) - 1
@@ -135,9 +136,88 @@ class H273:
             clipped_values = self.clip(transformed_values, bit_depth)
         else:
             padding = 1 << (bit_depth - 8)
-            transformed_values = padding * (([219] * 3) * values + ([16] * 3))
+            transformed_values = padding * (219 * values + 16)
             clipped_values = self.clip(transformed_values, bit_depth)
 
+        return clipped_values
+
+    def quantize_ypbpr(
+        self,
+        values: Iterable[Tuple[float32, float32, float32]],
+        bit_depth_y: int = 8,
+        bit_depth_cb: int = 8,
+        bit_depth_cr: int = 8,
+    ) -> NDArray[uintlike]:
+        """
+        Quantize the Y'PbPr values into Y'CbcCr values
+
+        ## Parameters
+        - `values`
+            - Y'PbPr values
+        - `bit_depth_y`
+            - Representation bit depth of the corresponding luma colour component signal
+            - It should be greater than or equal to `8`
+            - The default value is `8`
+        - `bit_depth_cb`
+            - Representation bit depth of the blue-difference chroma colour component signal
+            - It should be greater than or equal to `8`
+            - The default value is `8`
+        - `bit_depth_cr`
+            - Representation bit depth of the red-difference chroma colour component signal
+            - It should be greater than or equal to `8`
+            - The default value is `8`
+
+        ## Returns
+        - Quantized Y'CbcCr values (`NDArray[uintlike]`)
+            - The data types are determined based on the largest bit depths (Y, Cb, Cr)
+
+        ## Details
+        - The bit depths for chroma components might be distinct. *[Equation 3, Section 5.4]*
+
+        ## References
+        - See Equation 23 to 25, 29 to 31, Section 8 of Rec. ITU-T H.273.
+        """
+
+        from numpy import array, stack
+
+        if bit_depth_y < 8:
+            raise ValueError("The bit depth y should be greater than or equal to 8")
+        if bit_depth_cb < 8:
+            raise ValueError("The bit depth cb should be greater than or equal to 8")
+        if bit_depth_cr < 8:
+            raise ValueError("The bit depth cr should be greater than or equal to 8")
+
+        bit_depth_y, bit_depth_cb, bit_depth_cr = map(
+            int, (bit_depth_y, bit_depth_cb, bit_depth_cr)
+        )
+        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+
+        if self.is_full_range:
+            scale = (
+                1 << array([bit_depth_y, bit_depth_cb, bit_depth_cr], dtype=uint32)
+            ) - 1
+            padding = 1 << (
+                array([bit_depth_y, bit_depth_cb, bit_depth_cr], dtype=uint32) - 1
+            )
+            padding[0] = 0
+            transformed_values = (scale * values + padding).round()
+        else:
+            padding = 1 << (
+                array([bit_depth_y, bit_depth_cb, bit_depth_cr], dtype=uint32) - 8
+            )
+            transformed_values = (
+                padding * ([219, 224, 224] * values + [16, 128, 128])
+            ).round()
+
+        unclipped_values = transformed_values.T
+        clipped_values = stack(
+            [
+                self.clip(unclipped_values[0], bit_depth_y),
+                self.clip(unclipped_values[1], bit_depth_cb),
+                self.clip(unclipped_values[2], bit_depth_cr),
+            ],
+            axis=1,
+        )
         return clipped_values
 
     def rgb_to_ypbpr(
@@ -181,7 +261,9 @@ class H273:
 
         ## Parameters
         - `values`: Values to be clipped
-        - `bit_depth`: Representation bit depth of the values
+        - `bit_depth`:
+            - Representation bit depth of the values
+            - It should be greater than or equal to `0`
 
         ## Returns
         - Clipped values (`NDArray[uintlike]`)
@@ -196,7 +278,11 @@ class H273:
 
         from numpy import clip
 
+        if bit_depth < 0:
+            raise ValueError("The bit depth should be greater than or equal to 0")
+
         clipped_values = clip(values, 0, (1 << bit_depth) - 1)
+
         if bit_depth <= 8:
             return clipped_values.astype(uint8)
         elif bit_depth <= 16:
@@ -205,7 +291,5 @@ class H273:
             return clipped_values.astype(uint32)
         elif bit_depth <= 64:
             return clipped_values.astype(uint64)
-        elif bit_depth <= 128:
-            return clipped_values.astype(uint128)
-        elif bit_depth <= 256:
-            return clipped_values.astype(uint256)
+        else:
+            raise NotImplementedError("The bit depth is too large")
