@@ -9,8 +9,7 @@ class BT709:
     production and international programme exchange
     """
 
-    @staticmethod
-    def TRANS_RGB_TO_YCbCr() -> typing.NDArray[float32]:
+    def TRANS_RGB_TO_YCbCr(self) -> typing.NDArray[float32]:
         """
         Transformation matrix (`3x3`) from the analog RGB to analog YCbCr color space
 
@@ -32,8 +31,7 @@ class BT709:
             dtype=float32,
         )
 
-    @staticmethod
-    def TRANS_YCbCr_TO_RGB() -> typing.NDArray[float32]:
+    def TRANS_YCbCr_TO_RGB(self) -> typing.NDArray[float32]:
         """
         Transformation matrix (`3x3`) from the analog YCbCr to analog RGB color space
 
@@ -47,12 +45,11 @@ class BT709:
 
         from numpy import linalg
 
-        return linalg.inv(BT709.TRANS_RGB_TO_YCbCr())
+        return linalg.inv(self.TRANS_RGB_TO_YCbCr())
 
-    @staticmethod
-    def TRANS_AND_OFFSET_RGB_A_TO_D() -> (
-        tuple[typing.NDArray[float32], typing.NDArray[float32]]
-    ):
+    def TRANS_AND_OFFSET_RGB_A_TO_D(
+        self,
+    ) -> tuple[typing.NDArray[float32], typing.NDArray[float32]]:
         """
         Arguments for transformation from the analog RGB to digital RGB color space
 
@@ -74,10 +71,9 @@ class BT709:
         offset = array([16, 16, 16], dtype=float32)
         return (transform, offset)
 
-    @staticmethod
-    def TRANS_AND_OFFSET_RGB_D_TO_A() -> (
-        tuple[typing.NDArray[float32], typing.NDArray[float32]]
-    ):
+    def TRANS_AND_OFFSET_RGB_D_TO_A(
+        self,
+    ) -> tuple[typing.NDArray[float32], typing.NDArray[float32]]:
         """
         Arguments for transformation from the digital RGB to analog RGB color space
 
@@ -94,15 +90,14 @@ class BT709:
           [(Link)](https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-6-201506-I!!PDF-E.pdf)
         """
 
-        transform, offset = BT709.TRANS_AND_OFFSET_RGB_A_TO_D()
+        transform, offset = self.TRANS_AND_OFFSET_RGB_A_TO_D()
         transform = 1 / transform
         offset = -offset * transform
         return (transform, offset)
 
-    @staticmethod
-    def TRANS_AND_OFFSET_YCbCr_A_TO_D() -> (
-        tuple[typing.NDArray[float32], typing.NDArray[float32]]
-    ):
+    def TRANS_AND_OFFSET_YCbCr_A_TO_D(
+        self,
+    ) -> tuple[typing.NDArray[float32], typing.NDArray[float32]]:
         """
         Arguments for transformation from the analog YCbCr to digital YCbCr color space
 
@@ -125,10 +120,9 @@ class BT709:
         offset = array([16, 128, 128], dtype=float32)
         return (transform, offset)
 
-    @staticmethod
-    def TRANS_AND_OFFSET_YCbCr_D_TO_A() -> (
-        tuple[typing.NDArray[float32], typing.NDArray[float32]]
-    ):
+    def TRANS_AND_OFFSET_YCbCr_D_TO_A(
+        self,
+    ) -> tuple[typing.NDArray[float32], typing.NDArray[float32]]:
         """
         Arguments for transformation from the digital YCbCr to analog YCbCr color space
 
@@ -146,7 +140,7 @@ class BT709:
           [(Link)](https://www.itu.int/dms_pubrec/itu-r/rec/bt/R-REC-BT.709-6-201506-I!!PDF-E.pdf)
         """
 
-        transform, offset = BT709.TRANS_AND_OFFSET_YCbCr_A_TO_D()
+        transform, offset = self.TRANS_AND_OFFSET_YCbCr_A_TO_D()
         transform = 1 / transform
         offset = -offset * transform
         return (transform, offset)
