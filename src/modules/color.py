@@ -103,7 +103,7 @@ class H273:
         bit_depth: int = 8,
     ) -> NDArray[uintlike]:
         """
-        Quantize the RGB values
+        Quantize the RGB values (from analog to digital)
 
         ## Parameters
         - `values`
@@ -149,7 +149,7 @@ class H273:
         bit_depth_cr: int = 8,
     ) -> NDArray[uintlike]:
         """
-        Quantize the YPbPr values into YCbcCr values
+        Quantize the YPbPr values into YCbcCr values (from analog to digital)
 
         ## Parameters
         - `values`
@@ -198,9 +198,7 @@ class H273:
             scale = (
                 1 << array([bit_depth_y, bit_depth_cb, bit_depth_cr], dtype=uint32)
             ) - 1
-            padding = 1 << (
-                array([bit_depth_y, bit_depth_cb, bit_depth_cr], dtype=uint32) - 1
-            )
+            padding = 1 << (array([1, bit_depth_cb, bit_depth_cr], dtype=uint32) - 1)
             padding[0] = 0
             transformed_values = (scale * values + padding).round()
         else:
@@ -222,14 +220,59 @@ class H273:
         )
         return clipped_values
 
-    def rgb_to_ypbpr(
+    def rgb_from_ypbpr(
         self,
         values: Iterable[Tuple[float32, float32, float32]],
         kr: float32,
         kb: float32,
     ) -> NDArray[float32]:
         """
-        Calculate the YPbPr values from the RGB values
+        Compute the RGB values from the YPbPr values (from analog to analog)
+
+        ## Parameters
+        - `values`
+            - YPbPr values
+            - The Y values are in the range of `0.0` to `1.0` *[Note 3]*
+            - The Pb and Pr values are in the range of `-0.5` to `0.5` *[Note 3]*
+        - `kr`
+            - Constant `Kr` computed from color primaries *[Table 4]*
+        - `kb`
+            - Constant `Kb` computed from color primaries *[Table 4]*
+
+        ## Returns
+        - RGB values (`NDArray[float32]`)
+            - RGB values are in the range of `0.0` to `1.0`
+
+        ## Details
+        - The implementation differs on whether the RGB values are gamma-corrected or not
+            - *Case for `False` is not implemented yet*
+        - It is implemented as the inverse operation of `ypbpr_from_rgb`
+
+        ## References
+        - See Equation 38 to 40, 59 to 68 Section 8 of Rec. ITU-T H.273.
+        """
+
+        from numpy import array, linalg
+
+        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+
+        if self.is_rgb_gamma_corrected:
+            transform_matrix = linalg.inv(self.get_ypbpr_transformation_matrix(kr, kb))
+            transposed_values = values.T
+            transformed_values = (transform_matrix * transposed_values).T
+        else:
+            raise NotImplementedError("Case for `False` is not implemented yet")
+
+        return transformed_values
+
+    def ypbpr_from_rgb(
+        self,
+        values: Iterable[Tuple[float32, float32, float32]],
+        kr: float32,
+        kb: float32,
+    ) -> NDArray[float32]:
+        """
+        Compute the YPbPr values from the RGB values (from analog to analog)
 
         ## Parameters
         - `values`
@@ -254,10 +297,58 @@ class H273:
 
         from numpy import array
 
+        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+
         if self.is_rgb_gamma_corrected:
-            pass
+            transform_matrix = self.get_ypbpr_transformation_matrix(kr, kb)
+            transposed_values = values.T
+            transformed_values = (transform_matrix * transposed_values).T
         else:
             raise NotImplementedError("Case for `False` is not implemented yet")
+
+        return transformed_values
+
+    def get_ypbpr_transformation_matrix(
+        self,
+        kr: float32,
+        kb: float32,
+    ) -> NDArray[float32]:
+        """
+        Compute the transformation matrix from the RGB color space to the YPbPr one
+
+        ## Parameters
+        - `kr`
+            - Constant `Kr` computed from color primaries *[Table 4]*
+        - `kb`
+            - Constant `Kb` computed from color primaries *[Table 4]*
+
+        ## Returns
+        - Transformation matrix (`NDArray[float32]`)
+            - Shape: `(3, 3)`
+
+        ## Details
+        - Formula:
+
+            ```plaintext
+            Kg = 1 - Kr - Kb
+            Y  = (    Kr * R + Kg * G +     Kb * B)
+            Pb = (    Kr * R + Kg * G + (Kb-1) * B) * (-0.5 / (1 - Kb))
+            Pr = ((Kr-1) * R + Kg * G + (Kb-1) * B) * (-0.5 / (1 - Kr))
+            ```
+
+        ## References
+        - See Equation 38 to 40, Section 8 of Rec. ITU-T H.273.
+        """
+
+        from numpy import array
+
+        kg = 1 - kr - kb
+        transformation_matrix = array([[kr, kg, kb]] * 3, dtype=float32)
+        transformation_matrix[1][2] -= 1
+        transformation_matrix[2][0] -= 1
+        transformation_matrix[1] *= -0.5 / (1 - kb)
+        transformation_matrix[2] *= -0.5 / (1 - kr)
+        return transformation_matrix
 
     def clip(self, values: ArrayLike, bit_depth: int = 8) -> NDArray[uintlike]:
         """
