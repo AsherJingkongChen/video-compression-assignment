@@ -9,6 +9,9 @@ from ..modules.data import (
 )
 from ..modules.sample import BT2100
 
+(OUTPUTS_DIR_PATH / "task_1").mkdir(parents=True, exist_ok=True)
+
+# Load the source image
 image = Image.open(ASSETS_DIR_PATH / "foreman_qcif_0_rgb.bmp")
 
 # Ensure that the source image is in the full range RGB color space
@@ -56,7 +59,7 @@ image_data_as_cr_subsampled = sample.subsample_420(
 # Save the sub-sampled image in the planar YCbCr format a.k.a. YUV420p
 height, width = image_data_as_y_subsampled.shape
 with open(
-    OUTPUTS_DIR_PATH / f"foreman_qcif_0_ycbcr.yuv420p.{width}x{height}.yuv",
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_ycbcr.yuv420p.{width}x{height}.yuv",
     mode="wb",
 ) as file:
     save_ycbcr_image(
@@ -78,11 +81,13 @@ image_data_as_cr_upsampled = sample.upsample_420(
     image_data_as_y_subsampled,
     image_data_as_cr_subsampled,
 )
-image_data_as_ycbcr_upsampled = packed_from_planar((
-    image_data_as_y_upsampled,
-    image_data_as_cb_upsampled,
-    image_data_as_cr_upsampled,
-))
+image_data_as_ycbcr_upsampled = packed_from_planar(
+    (
+        image_data_as_y_upsampled,
+        image_data_as_cb_upsampled,
+        image_data_as_cr_upsampled,
+    )
+)
 
 # De-quantize the image from YCbCr to YPbPr
 image_data_as_ypbpr_back = color.set_full_range(False).dequantize_ycbcr(
@@ -100,7 +105,9 @@ image_data_as_drgb_back = color.set_full_range(True).quantize_rgb(
 # Save the image in the 24-bit RGB BMP format
 image_back = Image.fromarray(image_data_as_drgb_back, mode="RGB")
 width, height = image_back.size
-image_back.save(OUTPUTS_DIR_PATH / f"foreman_qcif_0_rgb.{width}x{height}.bmp")
+image_back.save(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_rgb.{width}x{height}.bmp"
+)
 
 # Ensure that the back image has the same size as the source image
 assert (
@@ -109,7 +116,7 @@ assert (
 
 a = image_data_as_drgb.astype(int32)
 b = image_data_as_drgb_back.astype(int32)
-r = abs(a - b).max()
-me = (a - b).mean()
-mse = ((a - b) ** 2).mean()
-print(f"R: {r}, ME: {me:.3f}, MSE: {mse:.3f}")
+absdiff = abs(a - b)
+r = absdiff.max()
+mae = absdiff.mean()
+print(f"R: {r}, MAE: {mae:.3f}")
