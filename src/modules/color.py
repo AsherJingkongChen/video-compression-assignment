@@ -132,7 +132,10 @@ class H273:
             raise ValueError("The bit depth should be greater than or equal to 8")
 
         bit_depth = int(bit_depth)
-        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+        values = array(values, dtype=float32)
+        
+        if values.shape[-1] != 3:
+            raise ValueError("The input values should be in the shape of (..., 3)")
 
         if self.is_full_range:
             scale = (1 << bit_depth) - 1
@@ -177,7 +180,10 @@ class H273:
             raise ValueError("The bit depth should be greater than or equal to 8")
 
         bit_depth = int(bit_depth)
-        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+        values = array(values, dtype=float32)
+
+        if values.shape[-1] != 3:
+            raise ValueError("The input values should be in the shape of (..., 3)")
 
         if self.is_full_range:
             scale = (1 << bit_depth) - 1
@@ -231,11 +237,20 @@ class H273:
 
         from numpy import array, stack
 
-        if bit_depth < 8:
-            raise ValueError("The bit depth should be greater than or equal to 8")
+        if bit_depth_y < 8:
+            raise ValueError("The bit depth y should be greater than or equal to 8")
+        if bit_depth_cb < 8:
+            raise ValueError("The bit depth cb should be greater than or equal to 8")
+        if bit_depth_cr < 8:
+            raise ValueError("The bit depth cr should be greater than or equal to 8")
 
-        bit_depth = int(bit_depth)
-        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+        bit_depth_y, bit_depth_cb, bit_depth_cr = map(
+            int, (bit_depth_y, bit_depth_cb, bit_depth_cr)
+        )
+        values = array(values, dtype=float32)
+
+        if values.shape[-1] != 3:
+            raise ValueError("The input values should be in the shape of (..., 3)")
 
         if self.is_full_range:
             scale = (
@@ -315,7 +330,10 @@ class H273:
         bit_depth_y, bit_depth_cb, bit_depth_cr = map(
             int, (bit_depth_y, bit_depth_cb, bit_depth_cr)
         )
-        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+        values = array(values, dtype=float32)
+
+        if values.shape[-1] != 3:
+            raise ValueError("The input values should be in the shape of (..., 3)")
 
         if self.is_full_range:
             scale = (
@@ -377,7 +395,10 @@ class H273:
 
         from numpy import array, linalg
 
-        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+        values = array(values, dtype=float32)
+
+        if values.shape[-1] != 3:
+            raise ValueError("The input values should be in the shape of (..., 3)")
 
         if self.is_rgb_gamma_corrected:
             transform_matrix = linalg.inv(self.get_ypbpr_transformation_matrix(kr, kb))
@@ -420,7 +441,10 @@ class H273:
 
         from numpy import array
 
-        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+        values = array(values, dtype=float32)
+        
+        if values.shape[-1] != 3:
+            raise ValueError("The input values should be in the shape of (..., 3)")
 
         if self.is_rgb_gamma_corrected:
             transform_matrix = self.get_ypbpr_transformation_matrix(kr, kb)
