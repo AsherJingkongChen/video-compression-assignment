@@ -14,7 +14,7 @@ class H273:
     video signal type identification
 
     ## Details
-    - Uses the release on 2016/12
+    - Adopts the version on 2016/12
 
     ## References
     - [Rec. ITU-T H.273](https://www.itu.int/rec/T-REC-H.273)
@@ -39,6 +39,7 @@ class H273:
         ## Details
         - This flag specifies the scaling and offset values applied
           in association with the other coefficients.
+        - Generally, the flag affect the behavior of the (de)quantization process.
         - When not specified, the value defaults to `False`.
 
         ## References
@@ -56,6 +57,7 @@ class H273:
         ## Details
         - This flag specifies the scaling and offset values applied
           in association with the other coefficients.
+        - Generally, the flag affect the behavior of the (de)quantization process.
         - When not specified, the value defaults to `False`.
 
         ## References
@@ -133,7 +135,7 @@ class H273:
 
         bit_depth = int(bit_depth)
         values = array(values, dtype=float32)
-        
+
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
 
@@ -265,14 +267,13 @@ class H273:
             )
             transformed_values = (values / padding - [16, 128, 128]) / [219, 224, 224]
 
-        unclipped_values = transformed_values.T
         clipped_values = stack(
             [
-                self.clip_analog(unclipped_values[0], +0.0, +1.0),
-                self.clip_analog(unclipped_values[1], -0.5, +0.5),
-                self.clip_analog(unclipped_values[2], -0.5, +0.5),
+                self.clip_analog(transformed_values[..., 0], +0.0, +1.0),
+                self.clip_analog(transformed_values[..., 1], -0.5, +0.5),
+                self.clip_analog(transformed_values[..., 2], -0.5, +0.5),
             ],
-            axis=1,
+            axis=-1,
         )
         return clipped_values
 
@@ -350,14 +351,13 @@ class H273:
                 padding * ([219, 224, 224] * values + [16, 128, 128])
             ).round()
 
-        unclipped_values = transformed_values.T
         clipped_values = stack(
             [
-                self.clip_digital(unclipped_values[0], bit_depth_y),
-                self.clip_digital(unclipped_values[1], bit_depth_cb),
-                self.clip_digital(unclipped_values[2], bit_depth_cr),
+                self.clip_digital(transformed_values[..., 0], bit_depth_y),
+                self.clip_digital(transformed_values[..., 1], bit_depth_cb),
+                self.clip_digital(transformed_values[..., 2], bit_depth_cr),
             ],
-            axis=1,
+            axis=-1,
         )
         return clipped_values
 
@@ -400,14 +400,19 @@ class H273:
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
 
+        original_shape = values.shape
+        values = values.reshape(-1, 3)
+
         if self.is_rgb_gamma_corrected:
             transform_matrix = linalg.inv(self.get_ypbpr_transformation_matrix(kr, kb))
-            transposed_values = values.T
-            transformed_values = (transform_matrix * transposed_values).T
+            transposed_values = values.transpose()
+            transformed_values = (transform_matrix @ transposed_values).transpose()
+            
         else:
             raise NotImplementedError("Case for `False` is not implemented yet")
 
-        return transformed_values
+        transformed_values = transformed_values
+        return transformed_values.reshape(original_shape)
 
     def ypbpr_from_rgb(
         self,
@@ -442,18 +447,21 @@ class H273:
         from numpy import array
 
         values = array(values, dtype=float32)
-        
+
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
 
+        original_shape = values.shape
+        values = values.reshape(-1, 3)
+
         if self.is_rgb_gamma_corrected:
             transform_matrix = self.get_ypbpr_transformation_matrix(kr, kb)
-            transposed_values = values.T
-            transformed_values = (transform_matrix * transposed_values).T
+            transposed_values = values.transpose()
+            transformed_values = (transform_matrix @ transposed_values).transpose()
         else:
             raise NotImplementedError("Case for `False` is not implemented yet")
 
-        return transformed_values
+        return transformed_values.reshape(original_shape)
 
     def get_ypbpr_transformation_matrix(
         self,
