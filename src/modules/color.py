@@ -331,9 +331,16 @@ class H273:
 
             ```plaintext
             Kg = 1 - Kr - Kb
-            Y  = (    Kr * R + Kg * G +     Kb * B)
-            Pb = (    Kr * R + Kg * G + (Kb-1) * B) * (-0.5 / (1 - Kb))
-            Pr = ((Kr-1) * R + Kg * G + (Kb-1) * B) * (-0.5 / (1 - Kr))
+            Sb = -0.5 / (1 - Kb)
+            Sr = -0.5 / (1 - Kr)
+            Y  = ( Kr      * R + Kg * G +  Kb      * B)
+            Pb = ( Kr      * R + Kg * G + (Kb - 1) * B) * Sb
+            Pr = ((Kr - 1) * R + Kg * G +  Kb      * B) * Sr
+            Transform = [
+                [ Kr,           Kg,       Kb          ],
+                [ Kr      * Sb, Kg * Sb, (Kb - 1) * Sb],
+                [(Kr - 1) * Sr, Kg * Sr,  Kb      * Sr],
+            ]
             ```
 
         ## References
