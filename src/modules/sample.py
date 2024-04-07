@@ -151,7 +151,7 @@ class BT2100:
         upscaled_chroma = repeat(repeat(chroma, 1, axis=0), 1, axis=1)
         cropped_chroma = upscaled_chroma[:v, :h, ...]
         return cropped_chroma
-    
+
     def upsample_422(self, luma: NDArray, chroma: NDArray) -> NDArray:
         """
         Up-sample chroma components which are sub-sampled using the scheme `4:2:2`
@@ -185,7 +185,7 @@ class BT2100:
         upscaled_chroma = repeat(repeat(chroma, 1, axis=0), 2, axis=1)
         cropped_chroma = upscaled_chroma[:v, :h, ...]
         return cropped_chroma
-    
+
     def upsample_420(self, luma: NDArray, chroma: NDArray) -> NDArray:
         """
         Up-sample chroma components which are sub-sampled using the scheme `4:2:0`

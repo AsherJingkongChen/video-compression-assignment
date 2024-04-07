@@ -4,6 +4,7 @@ from typing import Iterable, Tuple
 
 from .typing import uintlike
 
+
 class H273:
     """
     Recommendation ITU-T H.273
