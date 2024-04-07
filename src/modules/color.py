@@ -1,9 +1,8 @@
 from numpy import float32, uint8, uint16, uint32, uint64
 from numpy.typing import ArrayLike, NDArray
-from typing import Iterable, Tuple, TypeAlias, Union
+from typing import Iterable, Tuple
 
-uintlike: TypeAlias = Union[uint8, uint16, uint32, uint64]
-
+from .typing import uintlike
 
 class H273:
     """

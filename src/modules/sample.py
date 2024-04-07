@@ -21,8 +21,8 @@ class BT2100:
         Subsample chroma components using the scheme `4:4:4`
 
         ## Parameters
-        - `chroma`: Chroma components
-            - A NumPy array with the minimum dimension of 2
+        - `components`: Chroma components
+            - An array with the minimum dimension of 2
             - The shape is represented as `(V, H, ...)`
 
         ## Returns
@@ -41,7 +41,7 @@ class BT2100:
 
         components = asarray(components)
 
-        if len(components.shape) < 2:
+        if components.ndim < 2:
             raise ValueError("The minimum dimension of the components is 2")
 
         subsampled_components = components[::1, ::1]
@@ -52,8 +52,8 @@ class BT2100:
         Subsample chroma components using the scheme `4:2:2`
 
         ## Parameters
-        - `chroma`: Chroma components
-            - A NumPy array with the minimum dimension of 2
+        - `components`: Chroma components
+            - An array with the minimum dimension of 2
             - The shape is represented as `(V, H, ...)`
 
         ## Returns
@@ -72,7 +72,7 @@ class BT2100:
 
         components = asarray(components)
 
-        if len(components.shape) < 2:
+        if components.ndim < 2:
             raise ValueError("The minimum dimension of the components is 2")
 
         subsampled_components = components[::1, ::2]
@@ -83,8 +83,8 @@ class BT2100:
         Subsample chroma components using the scheme `4:2:0`
 
         ## Parameters
-        - `chroma`: Chroma components
-            - A NumPy array with the minimum dimension of 2
+        - `components`: Chroma components
+            - An array with the minimum dimension of 2
             - The shape is represented as `(V, H, ...)`
 
         ## Returns
@@ -103,7 +103,7 @@ class BT2100:
 
         components = asarray(components)
 
-        if len(components.shape) < 2:
+        if components.ndim < 2:
             raise ValueError("The minimum dimension of the components is 2")
 
         subsampled_components = components[::2, ::2]
