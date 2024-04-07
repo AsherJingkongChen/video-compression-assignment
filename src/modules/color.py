@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from numpy import float32, uint8, uint16, uint32, uint64
 from numpy.typing import ArrayLike, NDArray
 from typing import Iterable, Tuple, TypeAlias, Union
@@ -12,8 +13,11 @@ class H273:
     Coding-independent code points for
     video signal type identification
 
+    ## Details
+    - Uses the release on 2016/12
+
     ## References
-    - [ITU](https://www.itu.int/rec/T-REC-H.273-201612-S/en)
+    - [Rec. ITU-T H.273](https://www.itu.int/rec/T-REC-H.273)
     """
 
     _is_full_range: bool
@@ -119,7 +123,7 @@ class H273:
             - The values are in the range of `0.0` to `1.0`
 
         ## References
-        - See Equation 20 to 22, 26 to 28, Section 8 of Rec. ITU-T H.273.
+        - See Equation 20 to 22 and 26 to 28, Section 8 of Rec. ITU-T H.273.
         """
 
         from numpy import array
@@ -162,7 +166,7 @@ class H273:
             - With full range disabled, the values are in the range of `16` to `235`.
 
         ## References
-        - See Equation 20 to 22, 26 to 28, Section 8 of Rec. ITU-T H.273.
+        - See Equation 20 to 22 and 26 to 28, Section 8 of Rec. ITU-T H.273.
         """
 
         from numpy import array
@@ -222,7 +226,7 @@ class H273:
         - The bit depths for chroma components might be distinct. *[Equation 3, Section 5.4]*
 
         ## References
-        - See Equation 23 to 25, 29 to 31, Section 8 of Rec. ITU-T H.273.
+        - See Equation 23 to 25 and 29 to 31, Section 8 of Rec. ITU-T H.273.
         """
 
         from numpy import array, stack
@@ -296,7 +300,7 @@ class H273:
         - The bit depths for chroma components might be distinct. *[Equation 3, Section 5.4]*
 
         ## References
-        - See Equation 23 to 25, 29 to 31, Section 8 of Rec. ITU-T H.273.
+        - See Equation 23 to 25 and 29 to 31, Section 8 of Rec. ITU-T H.273.
         """
 
         from numpy import array, stack
@@ -368,7 +372,7 @@ class H273:
         - It is implemented as the inverse operation of `ypbpr_from_rgb`
 
         ## References
-        - See Equation 38 to 40, 59 to 68 Section 8 of Rec. ITU-T H.273.
+        - See Equation 38 to 40 and 59 to 68 Section 8 of Rec. ITU-T H.273.
         """
 
         from numpy import array, linalg
@@ -411,7 +415,7 @@ class H273:
             - *Case for `False` is not implemented yet*
 
         ## References
-        - See Equation 38 to 40, 59 to 68 Section 8 of Rec. ITU-T H.273.
+        - See Equation 38 to 40 and 59 to 68 Section 8 of Rec. ITU-T H.273.
         """
 
         from numpy import array
@@ -472,8 +476,8 @@ class H273:
         transformation_matrix = array([[kr, kg, kb]] * 3, dtype=float32)
         transformation_matrix[1][2] -= 1
         transformation_matrix[2][0] -= 1
-        transformation_matrix[1] *= -0.5 / (kb - 1)
-        transformation_matrix[2] *= -0.5 / (kr - 1)
+        transformation_matrix[1] *= 0.5 / (kb - 1)
+        transformation_matrix[2] *= 0.5 / (kr - 1)
         return transformation_matrix
 
     def clip_analog(
@@ -545,3 +549,25 @@ class H273:
             return clipped_values.astype(uint64)
         else:
             raise NotImplementedError("The bit depth is too large")
+
+
+def KR_KB_BT601() -> Tuple[float, float]:
+    """
+    Constant `Kr` and `Kb` values for Rec. ITU-R BT.601-7
+
+    ## References
+    - [Rec. ITU-T H.273](https://www.itu.int/rec/T-REC-H.273)
+    - Value 5 or 6, Table 4 of Rec. ITU-T H.273
+    """
+    return (0.299, 0.114)
+
+
+def KR_KB_BT709() -> Tuple[float, float]:
+    """
+    Constant `Kr` and `Kb` values for Rec. ITU-R BT.709-6
+
+    ## References
+    - [Rec. ITU-T H.273](https://www.itu.int/rec/T-REC-H.273)
+    - Value 1, Table 4 of Rec. ITU-T H.273
+    """
+    return (0.2126, 0.0722)
