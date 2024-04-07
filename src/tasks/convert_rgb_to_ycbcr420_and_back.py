@@ -56,21 +56,6 @@ image_data_as_cr_subsampled = sample.subsample_420(
     image_data_as_cr,
 )
 
-# Save the sub-sampled image in the planar YCbCr format a.k.a. YUV420p
-height, width = image_data_as_y_subsampled.shape
-with open(
-    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_ycbcr.yuv420p.{width}x{height}.yuv",
-    mode="wb",
-) as file:
-    save_ycbcr_image(
-        file,
-        (
-            image_data_as_y_subsampled,
-            image_data_as_cb_subsampled,
-            image_data_as_cr_subsampled,
-        ),
-    )
-
 # Up-sample the image in YCbCr color space from 4:2:0 to 4:4:4 scheme
 image_data_as_y_upsampled = image_data_as_y_subsampled.copy()
 image_data_as_cb_upsampled = sample.upsample_420(
@@ -102,17 +87,86 @@ image_data_as_drgb_back = color.set_full_range(True).quantize_rgb(
     image_data_as_argb_back
 )
 
-# Save the image in the 24-bit RGB BMP format
+#### Save the artifacts ####
+
+# Save the transformed image in the 24-bit RGB BMP format
 image_back = Image.fromarray(image_data_as_drgb_back, mode="RGB")
 width, height = image_back.size
 image_back.save(
     OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_rgb.{width}x{height}.bmp"
 )
 
-# Ensure that the back image has the same size as the source image
-assert (
-    image.size == image_back.size
-), "The back image should have the same size as the source image"
+# Save the Y, Cb and Cr images before sub-sampling in the 8-bit grayscale BMP format
+image_y = Image.fromarray(image_data_as_y, mode="L")
+width, height = image_y.size
+image_y.save(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_y_none.{width}x{height}.bmp"
+)
+
+image_cb = Image.fromarray(image_data_as_cb, mode="L")
+width, height = image_cb.size
+image_cb.save(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_cb_none.{width}x{height}.bmp"
+)
+
+image_cr = Image.fromarray(image_data_as_cr, mode="L")
+width, height = image_cr.size
+image_cr.save(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_cr_none.{width}x{height}.bmp"
+)
+
+# Save the Y, Cb and Cr images after sub-sampling in the 8-bit grayscale BMP format
+image_y_subsampled = Image.fromarray(image_data_as_y_subsampled, mode="L")
+width, height = image_y_subsampled.size
+image_y_subsampled.save(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_y_subs.{width}x{height}.bmp"
+)
+
+image_cb_subsampled = Image.fromarray(image_data_as_cb_subsampled, mode="L")
+width, height = image_cb_subsampled.size
+image_cb_subsampled.save(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_cb_subs.{width}x{height}.bmp"
+)
+
+image_cr_subsampled = Image.fromarray(image_data_as_cr_subsampled, mode="L")
+width, height = image_cr_subsampled.size
+image_cr_subsampled.save(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_cr_subs.{width}x{height}.bmp"
+)
+
+# Save the Y, Cb and Cr images after up-sampling in the 8-bit grayscale BMP format
+image_y_upsampled = Image.fromarray(image_data_as_y_upsampled, mode="L")
+width, height = image_y_upsampled.size
+image_y_upsampled.save(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_y_ups.{width}x{height}.bmp"
+)
+
+image_cb_upsampled = Image.fromarray(image_data_as_cb_upsampled, mode="L")
+width, height = image_cb_upsampled.size
+image_cb_upsampled.save(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_cb_ups.{width}x{height}.bmp"
+)
+
+image_cr_upsampled = Image.fromarray(image_data_as_cr_upsampled, mode="L")
+width, height = image_cr_upsampled.size
+image_cr_upsampled.save(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_cr_ups.{width}x{height}.bmp"
+)
+
+# Save the sub-sampled YCbCr image in the planar format (YUV420p)
+height, width = image_data_as_y_subsampled.shape
+with open(
+    OUTPUTS_DIR_PATH / "task_1" / f"foreman_qcif_0_ycbcr.yuv420p.{width}x{height}.yuv",
+    mode="wb",
+) as file:
+    save_ycbcr_image(
+        file,
+        (
+            image_data_as_y_subsampled,
+            image_data_as_cb_subsampled,
+            image_data_as_cr_subsampled,
+        ),
+    )
 
 a = image_data_as_drgb.astype(int32)
 b = image_data_as_drgb_back.astype(int32)
