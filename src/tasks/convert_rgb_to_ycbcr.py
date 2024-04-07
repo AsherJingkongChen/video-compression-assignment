@@ -17,7 +17,7 @@ assert (
 
 # Uses ITU-R BT.601 parameter values
 # - The source image is assumed to be gamma-corrected RGB
-color = H273(rgb_gamma_corrected=True)
+color = H273()
 
 # De-quanitze the image to analog RGB
 image_data_as_argb = color.set_full_range(True).dequantize_rgb(image_data_as_drgb)
@@ -26,7 +26,7 @@ image_data_as_argb = color.set_full_range(True).dequantize_rgb(image_data_as_drg
 kr, kb = KR_KB_BT601()
 image_data_as_ypbpr = color.ypbpr_from_rgb(image_data_as_argb, kr, kb)
 
-image_data_as_ycbcr = color.set_full_range(False).quantize_ypbpr(image_data_as_ypbpr)
+image_data_as_ycbcr = color.set_full_range(False).quantize_ycbcr(image_data_as_ypbpr)
 
 # Quantize the image from YPbPr to YCbCr
 print(image_data_as_ycbcr.min(), image_data_as_ycbcr.max())

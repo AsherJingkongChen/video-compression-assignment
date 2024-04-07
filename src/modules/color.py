@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from numpy import float32, uint8, uint16, uint32, uint64
 from numpy.typing import ArrayLike, NDArray
 from typing import Iterable, Tuple, TypeAlias, Union
@@ -21,16 +20,13 @@ class H273:
     """
 
     _is_full_range: bool
-    _is_rgb_gamma_corrected: bool
 
     def __init__(
         self,
         *,
         full_range: bool = False,
-        rgb_gamma_corrected: bool = True,
     ) -> None:
         self.set_full_range(full_range)
-        self.set_rgb_gamma_corrected(rgb_gamma_corrected)
 
     def set_full_range(self, flag: bool = False) -> "H273":
         """
@@ -66,54 +62,17 @@ class H273:
 
         return self._is_full_range
 
-    def set_rgb_gamma_corrected(self, flag: bool = True) -> "H273":
-        """
-        Set the RGB gamma-corrected flag
-
-        ## Details
-        - This flag specifies whether the input RGB values
-          are assumed to be gamma-corrected.
-        - When not specified, the value defaults to `True`.
-        - *Case for `False` is not implemented yet*
-
-        ## References
-        - See Section 8.2 of Rec. ITU-T H.273.
-        """
-
-        if not flag:
-            raise NotImplementedError("Case for `False` is not implemented yet")
-
-        self._is_rgb_gamma_corrected = flag
-        return self
-
-    @property
-    def is_rgb_gamma_corrected(self) -> bool:
-        """
-        Get the RGB gamma-corrected flag
-
-        ## Details
-        - This flag specifies whether the input RGB values
-          are assumed to be gamma-corrected.
-        - When not specified, the value defaults to `True`.
-        - *Case for `False` is not implemented yet*
-
-        ## References
-        - See Section 8.2 of Rec. ITU-T H.273.
-        """
-
-        return self._is_rgb_gamma_corrected
-
     def dequantize_rgb(
         self,
         values: Iterable[Tuple[float, float, float]],
         bit_depth: int = 8,
     ) -> NDArray[uintlike]:
         """
-        De-quantize the RGB values (from digital to analog)
+        De-quantize the R'G'B' values (from digital to analog)
 
         ## Parameters
         - `values`
-            - Quantized RGB values
+            - Quantized R'G'B' values
                 - With full range disabled, the values are in the range of `16` to `235`.
         - `bit_depth`
             - Representation bit depth of the corresponding luma colour component signal
@@ -121,20 +80,24 @@ class H273:
             - The default value is `8`
 
         ## Returns
-        - De-quantized RGB values (`NDArray[uintlike]`)
+        - De-quantized R'G'B' values (`NDArray[uintlike]`)
             - The values are in the range of `0.0` to `1.0`
+        
+        ## Details
+        - It is implemented as the inverse operation of `quantize_rgb`
+        - R'G'B' values are derived from gamma-corrected RGB values
 
         ## References
         - See Equation 20 to 22 and 26 to 28, Section 8 of Rec. ITU-T H.273.
         """
 
-        from numpy import array
+        from numpy import asarray
 
         if bit_depth < 8:
             raise ValueError("The bit depth should be greater than or equal to 8")
 
         bit_depth = int(bit_depth)
-        values = array(values, dtype=float32)
+        values = asarray(values, dtype=float32)
 
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
@@ -155,34 +118,35 @@ class H273:
         bit_depth: int = 8,
     ) -> NDArray[uintlike]:
         """
-        Quantize the RGB values (from analog to digital)
+        Quantize the R'G'B' values (from analog to digital)
 
         ## Parameters
         - `values`
-            - Gamma-corrected RGB values in the range of `0.0` to `1.0` *[Section 8.3]*
+            - R'G'B' values in the range of `0.0` to `1.0` *[Section 8.3]*
         - `bit_depth`
             - Representation bit depth of the corresponding luma colour component signal
             - It should be greater than or equal to `8`
             - The default value is `8`
 
         ## Returns
-        - Quantized RGB values (`NDArray[uintlike]`)
+        - Quantized R'G'B' values (`NDArray[uintlike]`)
             - The data types are determined based on the bit depth
             - With full range disabled, the values are in the range of `16` to `235`.
+
+        ## Details
+        - R'G'B' values are derived from gamma-corrected RGB values
 
         ## References
         - See Equation 20 to 22 and 26 to 28, Section 8 of Rec. ITU-T H.273.
         """
 
-        from numpy import array
+        from numpy import asarray
 
-        if not self.is_rgb_gamma_corrected:
-            raise ValueError("The input RGB values are assumed to be gamma-corrected")
         if bit_depth < 8:
             raise ValueError("The bit depth should be greater than or equal to 8")
 
         bit_depth = int(bit_depth)
-        values = array(values, dtype=float32)
+        values = asarray(values, dtype=float32)
 
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
@@ -205,39 +169,38 @@ class H273:
         bit_depth_cr: int = 8,
     ) -> NDArray[uintlike]:
         """
-        De-quantize the YCbCr values to YPbPr (from digital to analog)
+        De-quantize the Y'Cb'Cr' values to Y'Pb'Pr' (from digital to analog)
 
         ## Parameters
         - `values`
-            - YCbCr values
+            - Y'Cb'Cr' values
             - With full range disabled:
-                - The Y values are in the range of `16` to `235`
-                - The Cb and Cr values are in the range of `16` to `240`
+                - The Y' values are in the range of `16` to `235`
+                - The Cb' and Cr' values are in the range of `16` to `240`
         - `bit_depth_y`
             - Representation bit depth of the corresponding luma colour component signal
-            - It should be greater than or equal to `8`
-            - The default value is `8`
         - `bit_depth_cb`
             - Representation bit depth of the blue-difference chroma colour component signal
-            - It should be greater than or equal to `8`
-            - The default value is `8`
         - `bit_depth_cr`
             - Representation bit depth of the red-difference chroma colour component signal
+        - `bit_depth_y`, `bit_depth_cb`, `bit_depth_cr`
             - It should be greater than or equal to `8`
             - The default value is `8`
 
         ## Returns
-        - De-quantized YCbCr values (`NDArray[uintlike]`)
-            - The values are equal to YPbPr values
+        - De-quantized values (`NDArray[uintlike]`)
+            - The values are equal to Y'Pb'Pr' values
 
         ## Details
+        - It is implemented as the inverse operation of `quantize_ycbcr`
         - The bit depths for chroma components might be distinct. *[Equation 3, Section 5.4]*
+        - Y'Cb'Cr' and Y'Pb'Pr' values are derived from gamma-corrected RGB values
 
         ## References
         - See Equation 23 to 25 and 29 to 31, Section 8 of Rec. ITU-T H.273.
         """
 
-        from numpy import array, stack
+        from numpy import array, asarray, stack
 
         if bit_depth_y < 8:
             raise ValueError("The bit depth y should be greater than or equal to 8")
@@ -249,7 +212,7 @@ class H273:
         bit_depth_y, bit_depth_cb, bit_depth_cr = map(
             int, (bit_depth_y, bit_depth_cb, bit_depth_cr)
         )
-        values = array(values, dtype=float32)
+        values = asarray(values, dtype=float32)
 
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
@@ -277,7 +240,7 @@ class H273:
         )
         return clipped_values
 
-    def quantize_ypbpr(
+    def quantize_ycbcr(
         self,
         values: Iterable[Tuple[float, float, float]],
         bit_depth_y: int = 8,
@@ -285,41 +248,40 @@ class H273:
         bit_depth_cr: int = 8,
     ) -> NDArray[uintlike]:
         """
-        Quantize the YPbPr values to YCbCr values (from analog to digital)
+        Quantize the Y'Pb'Pr' values to Y'Cb'Cr' values (from analog to digital)
 
         ## Parameters
         - `values`
-            - YPbPr values
-            - The Y values are in the range of `0.0` to `1.0`
-            - The Pb and Pr values are in the range of `-0.5` to `0.5`
+            - Y'Pb'Pr' values
+            - The Y' values are in the range of `0.0` to `1.0`
+            - The Pb' and Pr' values are in the range of `-0.5` to `0.5`
         - `bit_depth_y`
             - Representation bit depth of the corresponding luma colour component signal
-            - It should be greater than or equal to `8`
-            - The default value is `8`
         - `bit_depth_cb`
             - Representation bit depth of the blue-difference chroma colour component signal
-            - It should be greater than or equal to `8`
-            - The default value is `8`
         - `bit_depth_cr`
             - Representation bit depth of the red-difference chroma colour component signal
+        - `bit_depth_y`, `bit_depth_cb`, `bit_depth_cr`
             - It should be greater than or equal to `8`
             - The default value is `8`
 
         ## Returns
-        - Quantized YCbCr values (`NDArray[uintlike]`)
+        - Quantized values (`NDArray[uintlike]`)
+            - The values are equal to Y'Cb'Cr' values
             - The data types are determined based on the largest bit depths
             - With full range disabled:
-                - The Y values are in the range of `16` to `235`
-                - The Cb and Cr values are in the range of `16` to `240`
+                - The Y' values are in the range of `16` to `235`
+                - The Cb' and Cr' values are in the range of `16` to `240`
 
         ## Details
         - The bit depths for chroma components might be distinct. *[Equation 3, Section 5.4]*
+        - Y'Cb'Cr' and Y'Pb'Pr' values are derived from gamma-corrected RGB values
 
         ## References
         - See Equation 23 to 25 and 29 to 31, Section 8 of Rec. ITU-T H.273.
         """
 
-        from numpy import array, stack
+        from numpy import array, asarray, stack
 
         if bit_depth_y < 8:
             raise ValueError("The bit depth y should be greater than or equal to 8")
@@ -331,7 +293,7 @@ class H273:
         bit_depth_y, bit_depth_cb, bit_depth_cr = map(
             int, (bit_depth_y, bit_depth_cb, bit_depth_cr)
         )
-        values = array(values, dtype=float32)
+        values = asarray(values, dtype=float32)
 
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
@@ -368,34 +330,31 @@ class H273:
         kb: float,
     ) -> NDArray[float32]:
         """
-        Compute the RGB values from the YPbPr values (from analog to analog)
+        Compute the R'G'B' values from the Y'Pb'Pr' values (from analog to analog)
 
         ## Parameters
         - `values`
-            - YPbPr values
-            - The Y values are in the range of `0.0` to `1.0` *[Note 3]*
-            - The Pb and Pr values are in the range of `-0.5` to `0.5` *[Note 3]*
-        - `kr`
-            - Constant `Kr` computed from color primaries *[Table 4]*
-        - `kb`
-            - Constant `Kb` computed from color primaries *[Table 4]*
+            - Y'Pb'Pr' values
+            - The Y' values are in the range of `0.0` to `1.0` *[Note 3]*
+            - The Pb' and Pr' values are in the range of `-0.5` to `0.5` *[Note 3]*
+        - `kr`: The constant computed from color primaries *[Table 4]*
+        - `kb`: The constant computed from color primaries *[Table 4]*
 
         ## Returns
-        - RGB values (`NDArray[float32]`)
+        - R'G'B' values (`NDArray[float32]`)
             - The values are in the range of `0.0` to `1.0`
 
         ## Details
-        - The implementation differs on whether the RGB values are gamma-corrected or not
-            - *Case for `False` is not implemented yet*
         - It is implemented as the inverse operation of `ypbpr_from_rgb`
+        - R'G'B' and Y'Pb'Pr' values are derived from gamma-corrected RGB values
 
         ## References
-        - See Equation 38 to 40 and 59 to 68 Section 8 of Rec. ITU-T H.273.
+        - See Equation 38 to 40, Section 8 of Rec. ITU-T H.273.
         """
 
-        from numpy import array, linalg
+        from numpy import asarray, linalg
 
-        values = array(values, dtype=float32)
+        values = asarray(values, dtype=float32)
 
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
@@ -403,13 +362,9 @@ class H273:
         original_shape = values.shape
         values = values.reshape(-1, 3)
 
-        if self.is_rgb_gamma_corrected:
-            transform_matrix = linalg.inv(self.get_ypbpr_transformation_matrix(kr, kb))
-            transposed_values = values.transpose()
-            transformed_values = (transform_matrix @ transposed_values).transpose()
-
-        else:
-            raise NotImplementedError("Case for `False` is not implemented yet")
+        transform_matrix = linalg.inv(self.get_ypbpr_transformation_matrix(kr, kb))
+        transposed_values = values.transpose()
+        transformed_values = (transform_matrix @ transposed_values).transpose()
 
         transformed_values = transformed_values.reshape(original_shape)
         return transformed_values
@@ -421,32 +376,29 @@ class H273:
         kb: float,
     ) -> NDArray[float32]:
         """
-        Compute the YPbPr values from the RGB values (from analog to analog)
+        Compute the Y'Pb'Pr' values from the R'G'B' values (from analog to analog)
 
         ## Parameters
         - `values`
-            - RGB values in the range of `0.0` to `1.0`
-        - `kr`
-            - Constant `Kr` computed from color primaries *[Table 4]*
-        - `kb`
-            - Constant `Kb` computed from color primaries *[Table 4]*
+            - R'G'B' values in the range of `0.0` to `1.0`
+        - `kr`: The constant computed from color primaries *[Table 4]*
+        - `kb`: The constant computed from color primaries *[Table 4]*
 
         ## Returns
-        - YPbPr values (`NDArray[float32]`)
-            - The Y values are in the range of `0.0` to `1.0` *[Note 3]*
-            - The Pb and Pr values are in the range of `-0.5` to `0.5` *[Note 3]*
+        - Y'PbPr values (`NDArray[float32]`)
+            - The Y' values are in the range of `0.0` to `1.0` *[Note 3]*
+            - The Pb' and Pr' values are in the range of `-0.5` to `0.5` *[Note 3]*
 
         ## Details
-        - The implementation differs on whether the RGB values are gamma-corrected or not
-            - *Case for `False` is not implemented yet*
+        - R'G'B' and Y'Pb'Pr' values are derived from gamma-corrected RGB values
 
         ## References
-        - See Equation 38 to 40 and 59 to 68 Section 8 of Rec. ITU-T H.273.
+        - See Equation 38 to 40, Section 8 of Rec. ITU-T H.273.
         """
 
-        from numpy import array
+        from numpy import asarray
 
-        values = array(values, dtype=float32)
+        values = asarray(values, dtype=float32)
 
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
@@ -454,12 +406,9 @@ class H273:
         original_shape = values.shape
         values = values.reshape(-1, 3)
 
-        if self.is_rgb_gamma_corrected:
-            transform_matrix = self.get_ypbpr_transformation_matrix(kr, kb)
-            transposed_values = values.transpose()
-            transformed_values = (transform_matrix @ transposed_values).transpose()
-        else:
-            raise NotImplementedError("Case for `False` is not implemented yet")
+        transform_matrix = self.get_ypbpr_transformation_matrix(kr, kb)
+        transposed_values = values.transpose()
+        transformed_values = (transform_matrix @ transposed_values).transpose()
 
         transformed_values = transformed_values.reshape(original_shape)
         return transformed_values
@@ -470,13 +419,11 @@ class H273:
         kb: float,
     ) -> NDArray[float32]:
         """
-        Compute the transformation matrix from the RGB color space to the YPbPr one
+        Compute the transformation matrix from the RGB color space to the Y'Pb'Pr' one
 
         ## Parameters
-        - `kr`
-            - Constant `Kr` computed from color primaries *[Table 4]*
-        - `kb`
-            - Constant `Kb` computed from color primaries *[Table 4]*
+        - `kr`: The constant computed from color primaries *[Table 4]*
+        - `kb`: The constant computed from color primaries *[Table 4]*
 
         ## Returns
         - Transformation matrix (`NDArray[float32]`)
@@ -489,13 +436,13 @@ class H273:
             Kg = 1 - Kr - Kb
             Sb = 0.5 / (Kb - 1)
             Sr = 0.5 / (Kr - 1)
-            Y  = ( Kr      * R + Kg * G +  Kb      * B)
-            Pb = ( Kr      * R + Kg * G + (Kb - 1) * B) * Sb
-            Pr = ((Kr - 1) * R + Kg * G +  Kb      * B) * Sr
+            Y  = ( Kr      * R' + Kg * G' +  Kb      * B')
+            Pb = ( Kr      * R' + Kg * G' + (Kb - 1) * B') * Sb
+            Pr = ((Kr - 1) * R' + Kg * G' +  Kb      * B') * Sr
             Transform = [
-                [ Kr,           Kg,       Kb          ],
-                [ Kr      * Sb, Kg * Sb, (Kb - 1) * Sb],
-                [(Kr - 1) * Sr, Kg * Sr,  Kb      * Sr],
+                 [ Kr,           Kg,       Kb          ],
+                 [ Kr      * Sb, Kg * Sb, (Kb - 1) * Sb],
+                 [(Kr - 1) * Sr, Kg * Sr,  Kb      * Sr],
             ]
             ```
 
