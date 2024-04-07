@@ -1,5 +1,5 @@
 from numpy.typing import NDArray
-from typing import BinaryIO, Tuple
+from typing import BinaryIO, Iterable, Tuple
 
 from .typing import uintlike
 
@@ -44,7 +44,7 @@ def save_ycbcr_image(
         device.write(plane.tobytes())
 
 
-def planar_from_packed(packed_data: NDArray) -> NDArray:
+def planar_from_packed(packed_data: NDArray) -> Iterable[NDArray]:
     """
     Represent packed data in the planar format.
 
@@ -62,7 +62,7 @@ def planar_from_packed(packed_data: NDArray) -> NDArray:
 
     return planar_data
 
-def packed_from_planar(planar_data: NDArray) -> NDArray:
+def packed_from_planar(planar_data: Iterable[NDArray]) -> NDArray:
     """
     Represent planar data in the packed format.
 

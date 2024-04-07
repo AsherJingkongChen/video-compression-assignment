@@ -1,7 +1,9 @@
 from PIL import Image
-from numpy import array, moveaxis, uint8
+from numpy import array, uint8, typing
 from .utils.env import ASSETS_DIR_PATH, OUTPUTS_DIR_PATH
 from ..modules.color import H273, KR_KB_BT601
+from ..modules.data import planar_from_packed, save_ycbcr_image
+from ..modules.sample import BT2100
 
 image = Image.open(ASSETS_DIR_PATH / "foreman_qcif_0_rgb.bmp")
 
@@ -19,6 +21,9 @@ assert (
 # - The source image is assumed to be gamma-corrected RGB
 color = H273()
 
+# Uses ITU-R BT.2100 parameter values
+sample = BT2100()
+
 # De-quanitze the image to analog RGB
 image_data_as_argb = color.set_full_range(True).dequantize_rgb(image_data_as_drgb)
 
@@ -28,15 +33,21 @@ image_data_as_ypbpr = color.ypbpr_from_rgb(image_data_as_argb, kr, kb)
 
 # Quantize the image from YPbPr to YCbCr
 image_data_as_ycbcr = color.set_full_range(False).quantize_ycbcr(image_data_as_ypbpr)
-print(image_data_as_ycbcr.min(), image_data_as_ycbcr.max())
 
-# Sub-sample the image in YPbPr color space using 4:2:0 scheme
-pass
+# Sub-sample the image in YCbCr color space using 4:2:0 scheme
+image_data_as_y, image_data_as_cb, image_data_as_cr = planar_from_packed(
+    image_data_as_ycbcr
+)
+image_data_as_y_subsampled = image_data_as_y.copy()
+image_data_as_cb_subsampled = sample.subsample_420(image_data_as_cb)
+image_data_as_cr_subsampled = sample.subsample_420(image_data_as_cr)
 
-# Save the sub-sampled image in the planar format
-pass
+# Save the sub-sampled image in the planar YCbCr format
+height, width = image_data_as_y_subsampled.shape
+with open(OUTPUTS_DIR_PATH / f"foreman_qcif_0_ycbcr_4-2-0.{width}x{height}.yuv", "wb") as file:
+    save_ycbcr_image(file, (image_data_as_y, image_data_as_cb, image_data_as_cr))
 
-# Up-sample the image in YPbPr color space using 4:2:0 scheme
+# Up-sample the image in YCbCr color space using 4:2:0 scheme
 pass
 
 # Convert the image from YPbPr to analog RGB
@@ -50,7 +61,7 @@ image_data_as_drgb_back = color.set_full_range(True).quantize_rgb(
 # Save the image in the 24-bit RGB BMP format
 image_back = Image.fromarray(image_data_as_drgb_back, mode="RGB")
 width, height = image_back.size
-image_back.save(OUTPUTS_DIR_PATH / f"foreman_qcif_0_rgb_back.{width}x{height}.bmp")
+image_back.save(OUTPUTS_DIR_PATH / f"foreman_qcif_0_rgb.{width}x{height}.bmp")
 
 # Ensure that the back image has the same size as the source image
 assert (
