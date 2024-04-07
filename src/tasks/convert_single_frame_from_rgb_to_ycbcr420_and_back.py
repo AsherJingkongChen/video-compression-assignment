@@ -173,6 +173,20 @@ with open(
         ),
     )
 
+# Save the pre-sub-sampled YCbCr image in the planar format (YUV444p)
+with open(
+    OUTPUTS_DIR_PATH / f"foreman_qcif_0_ycbcr.yuv444p.{width}x{height}.yuv",
+    mode="wb",
+) as file:
+    save_ycbcr_image(
+        file,
+        (
+            image_data_as_y,
+            image_data_as_cb,
+            image_data_as_cr,
+        ),
+    )
+
 ##################
 ###  Analysis  ###
 ##################

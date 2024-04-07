@@ -9,5 +9,6 @@ from ..modules.data import (
 )
 from ..modules.sample import BT2100
 
-OUTPUTS_DIR_PATH = OUTPUTS_DIR_PATH
+OUTPUTS_DIR_PATH = OUTPUTS_DIR_PATH / "task_2"
 OUTPUTS_DIR_PATH.mkdir(parents=True, exist_ok=True)
+
