@@ -96,10 +96,54 @@ class H273:
         """
 
         return self._is_rgb_gamma_corrected
+    
+    def dequantize_rgb(
+        self,
+        values: Iterable[Tuple[float, float, float]],
+        bit_depth: int = 8,
+    ) -> NDArray[uintlike]:
+        """
+        De-quantize the RGB values (from digital to analog)
+
+        ## Parameters
+        - `values`
+            - Gamma-corrected quantized RGB values
+                - With full range disabled, the values are in the range of `16` to `235`.
+        - `bit_depth`
+            - Representation bit depth of the corresponding luma colour component signal
+            - It should be greater than or equal to `8`
+            - The default value is `8`
+
+        ## Returns
+        - De-quantized RGB values (`NDArray[uintlike]`)
+            - The values are in the range of `0.0` to `1.0`
+
+        ## References
+        - See Equation 20 to 22, 26 to 28, Section 8 of Rec. ITU-T H.273.
+        """
+
+        from numpy import array
+
+        if not self.is_rgb_gamma_corrected:
+            raise ValueError("The input RGB values are assumed to be gamma-corrected")
+        if bit_depth < 8:
+            raise ValueError("The bit depth should be greater than or equal to 8")
+
+        bit_depth = int(bit_depth)
+        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+
+        if self.is_full_range:
+            scale = (1 << bit_depth) - 1
+            transformed_values = values / scale
+        else:
+            padding = 1 << (bit_depth - 8)
+            transformed_values = (values / padding - 16) / 219
+
+        return transformed_values
 
     def quantize_rgb(
         self,
-        values: Iterable[Tuple[float32, float32, float32]],
+        values: Iterable[Tuple[float, float, float]],
         bit_depth: int = 8,
     ) -> NDArray[uintlike]:
         """
@@ -115,6 +159,8 @@ class H273:
 
         ## Returns
         - Quantized RGB values (`NDArray[uintlike]`)
+            - The data types are determined based on the bit depth
+            - With full range disabled, the values are in the range of `16` to `235`.
 
         ## References
         - See Equation 20 to 22, 26 to 28, Section 8 of Rec. ITU-T H.273.
@@ -133,23 +179,81 @@ class H273:
         if self.is_full_range:
             scale = (1 << bit_depth) - 1
             transformed_values = scale * values
-            clipped_values = self.clip(transformed_values, bit_depth)
         else:
             padding = 1 << (bit_depth - 8)
             transformed_values = padding * (219 * values + 16)
-            clipped_values = self.clip(transformed_values, bit_depth)
 
+        clipped_values = self.clip(transformed_values, bit_depth)
         return clipped_values
+
+    def dequantize_ycbcr(
+        self,
+        values: Iterable[Tuple[float, float, float]],
+        bit_depth: int = 8,
+    ) -> NDArray[uintlike]:
+        """
+        De-quantize the YCbCr values to YPbPr (from digital to analog)
+
+        ## Parameters
+        - `values`
+            - YCbCr values
+            - With full range disabled:
+                - The Y values are in the range of `16` to `235`
+                - The Cb and Cr values are in the range of `16` to `240`
+        - `bit_depth_y`
+            - Representation bit depth of the corresponding luma colour component signal
+            - It should be greater than or equal to `8`
+            - The default value is `8`
+        - `bit_depth_cb`
+            - Representation bit depth of the blue-difference chroma colour component signal
+            - It should be greater than or equal to `8`
+            - The default value is `8`
+        - `bit_depth_cr`
+            - Representation bit depth of the red-difference chroma colour component signal
+            - It should be greater than or equal to `8`
+            - The default value is `8`
+
+        ## Returns
+        - De-quantized YCbCr values (`NDArray[uintlike]`)
+            - The values equal to YPbPr values
+
+        ## Details
+        - The bit depths for chroma components might be distinct. *[Equation 3, Section 5.4]*
+
+        ## References
+        - See Equation 23 to 25, 29 to 31, Section 8 of Rec. ITU-T H.273.
+        """
+
+        from numpy import array
+
+        if not self.is_rgb_gamma_corrected:
+            raise ValueError("The input RGB values are assumed to be gamma-corrected")
+        if bit_depth < 8:
+            raise ValueError("The bit depth should be greater than or equal to 8")
+
+        bit_depth = int(bit_depth)
+        values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
+
+        # if self.is_full_range:
+        #     scale = (1 << bit_depth) - 1
+        #     transformed_values = scale * values
+        #     clipped_values = self.clip(transformed_values, bit_depth)
+        # else:
+        #     padding = 1 << (bit_depth - 8)
+        #     transformed_values = padding * (219 * values + 16)
+        #     clipped_values = self.clip(transformed_values, bit_depth)
+
+        # return clipped_values
 
     def quantize_ypbpr(
         self,
-        values: Iterable[Tuple[float32, float32, float32]],
+        values: Iterable[Tuple[float, float, float]],
         bit_depth_y: int = 8,
         bit_depth_cb: int = 8,
         bit_depth_cr: int = 8,
     ) -> NDArray[uintlike]:
         """
-        Quantize the YPbPr values into YCbcCr values (from analog to digital)
+        Quantize the YPbPr values to YCbCr values (from analog to digital)
 
         ## Parameters
         - `values`
@@ -170,8 +274,11 @@ class H273:
             - The default value is `8`
 
         ## Returns
-        - Quantized YCbcCr values (`NDArray[uintlike]`)
-            - The data types are determined based on the largest bit depths (Y, Cb, Cr)
+        - Quantized YCbCr values (`NDArray[uintlike]`)
+            - The data types are determined based on the largest bit depths
+            - With full range disabled:
+                - The Y values are in the range of `16` to `235`
+                - The Cb and Cr values are in the range of `16` to `240`
 
         ## Details
         - The bit depths for chroma components might be distinct. *[Equation 3, Section 5.4]*
@@ -222,9 +329,9 @@ class H273:
 
     def rgb_from_ypbpr(
         self,
-        values: Iterable[Tuple[float32, float32, float32]],
-        kr: float32,
-        kb: float32,
+        values: Iterable[Tuple[float, float, float]],
+        kr: float,
+        kb: float,
     ) -> NDArray[float32]:
         """
         Compute the RGB values from the YPbPr values (from analog to analog)
@@ -241,7 +348,7 @@ class H273:
 
         ## Returns
         - RGB values (`NDArray[float32]`)
-            - RGB values are in the range of `0.0` to `1.0`
+            - The values are in the range of `0.0` to `1.0`
 
         ## Details
         - The implementation differs on whether the RGB values are gamma-corrected or not
@@ -267,9 +374,9 @@ class H273:
 
     def ypbpr_from_rgb(
         self,
-        values: Iterable[Tuple[float32, float32, float32]],
-        kr: float32,
-        kb: float32,
+        values: Iterable[Tuple[float, float, float]],
+        kr: float,
+        kb: float,
     ) -> NDArray[float32]:
         """
         Compute the YPbPr values from the RGB values (from analog to analog)
@@ -310,8 +417,8 @@ class H273:
 
     def get_ypbpr_transformation_matrix(
         self,
-        kr: float32,
-        kb: float32,
+        kr: float,
+        kb: float,
     ) -> NDArray[float32]:
         """
         Compute the transformation matrix from the RGB color space to the YPbPr one
@@ -331,8 +438,8 @@ class H273:
 
             ```plaintext
             Kg = 1 - Kr - Kb
-            Sb = -0.5 / (1 - Kb)
-            Sr = -0.5 / (1 - Kr)
+            Sb = 0.5 / (Kb - 1)
+            Sr = 0.5 / (Kr - 1)
             Y  = ( Kr      * R + Kg * G +  Kb      * B)
             Pb = ( Kr      * R + Kg * G + (Kb - 1) * B) * Sb
             Pr = ((Kr - 1) * R + Kg * G +  Kb      * B) * Sr
@@ -353,8 +460,8 @@ class H273:
         transformation_matrix = array([[kr, kg, kb]] * 3, dtype=float32)
         transformation_matrix[1][2] -= 1
         transformation_matrix[2][0] -= 1
-        transformation_matrix[1] *= -0.5 / (1 - kb)
-        transformation_matrix[2] *= -0.5 / (1 - kr)
+        transformation_matrix[1] *= -0.5 / (kb - 1)
+        transformation_matrix[2] *= -0.5 / (kr - 1)
         return transformation_matrix
 
     def clip(self, values: ArrayLike, bit_depth: int = 8) -> NDArray[uintlike]:
