@@ -407,12 +407,12 @@ class H273:
             transform_matrix = linalg.inv(self.get_ypbpr_transformation_matrix(kr, kb))
             transposed_values = values.transpose()
             transformed_values = (transform_matrix @ transposed_values).transpose()
-            
+
         else:
             raise NotImplementedError("Case for `False` is not implemented yet")
 
-        transformed_values = transformed_values
-        return transformed_values.reshape(original_shape)
+        transformed_values = transformed_values.reshape(original_shape)
+        return transformed_values
 
     def ypbpr_from_rgb(
         self,
@@ -461,7 +461,8 @@ class H273:
         else:
             raise NotImplementedError("Case for `False` is not implemented yet")
 
-        return transformed_values.reshape(original_shape)
+        transformed_values = transformed_values.reshape(original_shape)
+        return transformed_values
 
     def get_ypbpr_transformation_matrix(
         self,
