@@ -149,11 +149,13 @@ class H273:
         bit_depth_cr: int = 8,
     ) -> NDArray[uintlike]:
         """
-        Quantize the Y'PbPr values into Y'CbcCr values
+        Quantize the YPbPr values into YCbcCr values
 
         ## Parameters
         - `values`
-            - Y'PbPr values
+            - YPbPr values
+            - The Y values are in the range of `0.0` to `1.0`
+            - The Pb and Pr values are in the range of `-0.5` to `0.5`
         - `bit_depth_y`
             - Representation bit depth of the corresponding luma colour component signal
             - It should be greater than or equal to `8`
@@ -168,7 +170,7 @@ class H273:
             - The default value is `8`
 
         ## Returns
-        - Quantized Y'CbcCr values (`NDArray[uintlike]`)
+        - Quantized YCbcCr values (`NDArray[uintlike]`)
             - The data types are determined based on the largest bit depths (Y, Cb, Cr)
 
         ## Details
@@ -227,7 +229,7 @@ class H273:
         kb: float32,
     ) -> NDArray[float32]:
         """
-        Calculate the Y'PbPr values from the RGB values
+        Calculate the YPbPr values from the RGB values
 
         ## Parameters
         - `values`
@@ -238,7 +240,9 @@ class H273:
             - Constant `Kb` computed from color primaries *[Table 4]*
 
         ## Returns
-        - Y'PbPr values (`NDArray[float32]`)
+        - YPbPr values (`NDArray[float32]`)
+            - The Y values are in the range of `0.0` to `1.0` *[Note 3]*
+            - The Pb and Pr values are in the range of `-0.5` to `0.5` *[Note 3]*
 
         ## Details
         - The implementation differs on whether the RGB values are gamma-corrected or not

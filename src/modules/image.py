@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from PIL.Image import Image
 
-from .parameters import BT709
+from .color import BT709
 
 
 @dataclass
