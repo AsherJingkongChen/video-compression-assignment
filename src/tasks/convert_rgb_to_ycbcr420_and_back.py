@@ -42,9 +42,9 @@ image_data_as_y_subsampled = image_data_as_y.copy()
 image_data_as_cb_subsampled = sample.subsample_420(image_data_as_cb)
 image_data_as_cr_subsampled = sample.subsample_420(image_data_as_cr)
 
-# Save the sub-sampled image in the planar YCbCr format
+# Save the sub-sampled image in the planar YCbCr format a.k.a. YUV420p
 height, width = image_data_as_y_subsampled.shape
-with open(OUTPUTS_DIR_PATH / f"foreman_qcif_0_ycbcr_4-2-0.{width}x{height}.yuv", "wb") as file:
+with open(OUTPUTS_DIR_PATH / f"foreman_qcif_0_ycbcr.yuv420p.{width}x{height}.yuv", "wb") as file:
     save_ycbcr_image(file, (image_data_as_y, image_data_as_cb, image_data_as_cr))
 
 # Up-sample the image in YCbCr color space using 4:2:0 scheme
