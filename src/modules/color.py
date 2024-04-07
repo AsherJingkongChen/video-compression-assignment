@@ -107,7 +107,7 @@ class H273:
 
         ## Parameters
         - `values`
-            - Gamma-corrected quantized RGB values
+            - Quantized RGB values
                 - With full range disabled, the values are in the range of `16` to `235`.
         - `bit_depth`
             - Representation bit depth of the corresponding luma colour component signal
@@ -124,8 +124,6 @@ class H273:
 
         from numpy import array
 
-        if not self.is_rgb_gamma_corrected:
-            raise ValueError("The input RGB values are assumed to be gamma-corrected")
         if bit_depth < 8:
             raise ValueError("The bit depth should be greater than or equal to 8")
 
@@ -229,8 +227,6 @@ class H273:
 
         from numpy import array, stack
 
-        if not self.is_rgb_gamma_corrected:
-            raise ValueError("The input RGB values are assumed to be gamma-corrected")
         if bit_depth < 8:
             raise ValueError("The bit depth should be greater than or equal to 8")
 
