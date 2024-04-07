@@ -19,26 +19,32 @@ assert (
 color = H273()
 
 # De-quanitze the image
-color.set_full_range(True)
-image_data_as_argb = color.dequantize_rgb(image_data_as_drgb)
+image_data_as_argb = color.set_full_range(True).dequantize_rgb(image_data_as_drgb)
 
 # Convert the image from analog RGB to YPbPr
-color.set_rgb_gamma_corrected(True)
 kr, kb = KR_KB_BT601()
-image_data_as_ypbpr = color.ypbpr_from_rgb(image_data_as_argb, kr, kb)
+image_data_as_ypbpr = color.set_rgb_gamma_corrected(True).ypbpr_from_rgb(
+    image_data_as_argb, kr, kb
+)
 
-# Quantize the image from YPbPr to YCbCr
-color.set_full_range(False)
-image_data_as_ycbcr = color.quantize_ypbpr(image_data_as_ypbpr)
+image_data_as_ycbcr = color.set_full_range(False).quantize_ypbpr(image_data_as_ypbpr)
+
+# Quantize the image from YPbPr to YCbCr and save it in YUV444 planar format
+pass
+
+# Sub-sample the image in YPbPr color space using 4:2:0 scheme
+pass
+
+# Quantize from YPbPr to YCbCr and save the image in YUV420 planar format
+pass
+
+# Up-sample the image in YPbPr color space using 4:2:0 scheme
+pass
 
 # Convert the image from YPbPr to analog RGB
-image_data_as_argb = color.rgb_from_ypbpr(image_data_as_ypbpr, kr, kb)
+image_data_as_argb_back = color.rgb_from_ypbpr(image_data_as_ypbpr, kr, kb)
 
-# Quantize the image from analog RGB to digital RGB
-color.set_full_range(True)
-image_data_as_drgb_remade = color.quantize_rgb(image_data_as_argb)
-
-print(image_data_as_drgb.size)
-print(image_data_as_drgb.reshape(-1, 3))
-print(image_data_as_drgb_remade.reshape(-1, 3))
-print((image_data_as_drgb.astype(int) - image_data_as_drgb_remade.astype(int)).mean())
+# Quantize the image from analog RGB to digital RGB and save in it BMP RGB24 format
+image_data_as_drgb_back = color.set_full_range(True).quantize_rgb(
+    image_data_as_argb_back
+)
