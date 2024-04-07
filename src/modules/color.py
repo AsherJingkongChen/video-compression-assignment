@@ -96,7 +96,7 @@ class H273:
         """
 
         return self._is_rgb_gamma_corrected
-    
+
     def dequantize_rgb(
         self,
         values: Iterable[Tuple[float, float, float]],
@@ -139,7 +139,8 @@ class H273:
             padding = 1 << (bit_depth - 8)
             transformed_values = (values / padding - 16) / 219
 
-        return transformed_values
+        clipped_values = self.clip_analog(transformed_values, 0.0, 1.0)
+        return clipped_values
 
     def quantize_rgb(
         self,
@@ -183,13 +184,15 @@ class H273:
             padding = 1 << (bit_depth - 8)
             transformed_values = padding * (219 * values + 16)
 
-        clipped_values = self.clip(transformed_values, bit_depth)
+        clipped_values = self.clip_digital(transformed_values, bit_depth)
         return clipped_values
 
     def dequantize_ycbcr(
         self,
         values: Iterable[Tuple[float, float, float]],
-        bit_depth: int = 8,
+        bit_depth_y: int = 8,
+        bit_depth_cb: int = 8,
+        bit_depth_cr: int = 8,
     ) -> NDArray[uintlike]:
         """
         De-quantize the YCbCr values to YPbPr (from digital to analog)
@@ -215,7 +218,7 @@ class H273:
 
         ## Returns
         - De-quantized YCbCr values (`NDArray[uintlike]`)
-            - The values equal to YPbPr values
+            - The values are equal to YPbPr values
 
         ## Details
         - The bit depths for chroma components might be distinct. *[Equation 3, Section 5.4]*
@@ -224,7 +227,7 @@ class H273:
         - See Equation 23 to 25, 29 to 31, Section 8 of Rec. ITU-T H.273.
         """
 
-        from numpy import array
+        from numpy import array, stack
 
         if not self.is_rgb_gamma_corrected:
             raise ValueError("The input RGB values are assumed to be gamma-corrected")
@@ -234,16 +237,29 @@ class H273:
         bit_depth = int(bit_depth)
         values = array(values, dtype=float32, ndmin=2).reshape(-1, 3)
 
-        # if self.is_full_range:
-        #     scale = (1 << bit_depth) - 1
-        #     transformed_values = scale * values
-        #     clipped_values = self.clip(transformed_values, bit_depth)
-        # else:
-        #     padding = 1 << (bit_depth - 8)
-        #     transformed_values = padding * (219 * values + 16)
-        #     clipped_values = self.clip(transformed_values, bit_depth)
+        if self.is_full_range:
+            scale = (
+                1 << array([bit_depth_y, bit_depth_cb, bit_depth_cr], dtype=uint32)
+            ) - 1
+            padding = 1 << (array([1, bit_depth_cb, bit_depth_cr], dtype=uint32) - 1)
+            padding[0] = 0
+            transformed_values = (values - padding) / scale
+        else:
+            padding = 1 << (
+                array([bit_depth_y, bit_depth_cb, bit_depth_cr], dtype=uint32) - 8
+            )
+            transformed_values = (values / padding - [16, 128, 128]) / [219, 224, 224]
 
-        # return clipped_values
+        unclipped_values = transformed_values.T
+        clipped_values = stack(
+            [
+                self.clip_analog(unclipped_values[0], +0.0, +1.0),
+                self.clip_analog(unclipped_values[1], -0.5, +0.5),
+                self.clip_analog(unclipped_values[2], -0.5, +0.5),
+            ],
+            axis=1,
+        )
+        return clipped_values
 
     def quantize_ypbpr(
         self,
@@ -319,9 +335,9 @@ class H273:
         unclipped_values = transformed_values.T
         clipped_values = stack(
             [
-                self.clip(unclipped_values[0], bit_depth_y),
-                self.clip(unclipped_values[1], bit_depth_cb),
-                self.clip(unclipped_values[2], bit_depth_cr),
+                self.clip_digital(unclipped_values[0], bit_depth_y),
+                self.clip_digital(unclipped_values[1], bit_depth_cb),
+                self.clip_digital(unclipped_values[2], bit_depth_cr),
             ],
             axis=1,
         )
@@ -464,9 +480,39 @@ class H273:
         transformation_matrix[2] *= -0.5 / (kr - 1)
         return transformation_matrix
 
-    def clip(self, values: ArrayLike, bit_depth: int = 8) -> NDArray[uintlike]:
+    def clip_analog(
+        self,
+        values: ArrayLike,
+        min: float,
+        max: float,
+    ) -> NDArray[float32]:
         """
-        Clip the values within the specified bit depth
+        Clip the analog values within the specified bit depth
+
+        ## Parameters
+        - `values`: Values to be clipped
+        - `min`: Minumum value
+        - `max`: Maximum value
+
+        ## Returns
+        - Clipped values (`NDArray[float32]`)
+
+        ## Details
+        - Formula: `clip_a(x) = min(max(x, min), max))`
+        - The function is used for de-quantized representation
+        """
+
+        from numpy import clip
+
+        return clip(values, min, max).astype(float32)
+
+    def clip_digital(
+        self,
+        values: ArrayLike,
+        bit_depth: int = 8,
+    ) -> NDArray[uintlike]:
+        """
+        Clip the digital values within the specified bit depth
 
         ## Parameters
         - `values`: Values to be clipped
@@ -478,8 +524,9 @@ class H273:
         - Clipped values (`NDArray[uintlike]`)
 
         ## Details
-        - Formula: `clip(x) = min(max(x, 0), ((1 << bit_depth) - 1))`
+        - Formula: `clip_d(x) = min(max(x, 0), ((1 << bit_depth) - 1))`
         - The values are casted into suitable unsigned integer types
+        - The function is used for quantized representation
 
         ## References
         - See Equation 2 to 4, Section 5.4 of Rec. ITU-T H.273.
