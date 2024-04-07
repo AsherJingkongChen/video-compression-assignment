@@ -82,7 +82,7 @@ class H273:
         ## Returns
         - De-quantized R'G'B' values (`NDArray[uintlike]`)
             - The values are in the range of `0.0` to `1.0`
-        
+
         ## Details
         - It is implemented as the inverse operation of `quantize_rgb`
         - R'G'B' values are derived from gamma-corrected RGB values
@@ -93,12 +93,11 @@ class H273:
 
         from numpy import asarray
 
-        if bit_depth < 8:
-            raise ValueError("The bit depth should be greater than or equal to 8")
-
         bit_depth = int(bit_depth)
         values = asarray(values, dtype=float32)
 
+        if bit_depth < 8:
+            raise ValueError("The bit depth should be greater than or equal to 8")
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
 
@@ -142,12 +141,11 @@ class H273:
 
         from numpy import asarray
 
-        if bit_depth < 8:
-            raise ValueError("The bit depth should be greater than or equal to 8")
-
         bit_depth = int(bit_depth)
         values = asarray(values, dtype=float32)
 
+        if bit_depth < 8:
+            raise ValueError("The bit depth should be greater than or equal to 8")
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
 
@@ -202,18 +200,17 @@ class H273:
 
         from numpy import array, asarray, stack
 
+        bit_depth_y, bit_depth_cb, bit_depth_cr = map(
+            int, (bit_depth_y, bit_depth_cb, bit_depth_cr)
+        )
+        values = asarray(values, dtype=float32)
+
         if bit_depth_y < 8:
             raise ValueError("The bit depth y should be greater than or equal to 8")
         if bit_depth_cb < 8:
             raise ValueError("The bit depth cb should be greater than or equal to 8")
         if bit_depth_cr < 8:
             raise ValueError("The bit depth cr should be greater than or equal to 8")
-
-        bit_depth_y, bit_depth_cb, bit_depth_cr = map(
-            int, (bit_depth_y, bit_depth_cb, bit_depth_cr)
-        )
-        values = asarray(values, dtype=float32)
-
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
 
@@ -283,18 +280,17 @@ class H273:
 
         from numpy import array, asarray, stack
 
+        bit_depth_y, bit_depth_cb, bit_depth_cr = map(
+            int, (bit_depth_y, bit_depth_cb, bit_depth_cr)
+        )
+        values = asarray(values, dtype=float32)
+
         if bit_depth_y < 8:
             raise ValueError("The bit depth y should be greater than or equal to 8")
         if bit_depth_cb < 8:
             raise ValueError("The bit depth cb should be greater than or equal to 8")
         if bit_depth_cr < 8:
             raise ValueError("The bit depth cr should be greater than or equal to 8")
-
-        bit_depth_y, bit_depth_cb, bit_depth_cr = map(
-            int, (bit_depth_y, bit_depth_cb, bit_depth_cr)
-        )
-        values = asarray(values, dtype=float32)
-
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
 
@@ -514,10 +510,11 @@ class H273:
 
         from numpy import clip
 
+        bit_depth = int(bit_depth)
+        clipped_values = clip(values, 0, (1 << bit_depth) - 1)
+
         if bit_depth < 0:
             raise ValueError("The bit depth should be greater than or equal to 0")
-
-        clipped_values = clip(values, 0, (1 << bit_depth) - 1)
 
         if bit_depth <= 8:
             return clipped_values.astype(uint8)

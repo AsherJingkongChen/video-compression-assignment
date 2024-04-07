@@ -26,20 +26,9 @@ image_data_as_argb = color.set_full_range(True).dequantize_rgb(image_data_as_drg
 kr, kb = KR_KB_BT601()
 image_data_as_ypbpr = color.ypbpr_from_rgb(image_data_as_argb, kr, kb)
 
-image_data_as_ycbcr = color.set_full_range(False).quantize_ycbcr(image_data_as_ypbpr)
-
 # Quantize the image from YPbPr to YCbCr
+image_data_as_ycbcr = color.set_full_range(False).quantize_ycbcr(image_data_as_ypbpr)
 print(image_data_as_ycbcr.min(), image_data_as_ycbcr.max())
-
-planar_image_data = moveaxis(image_data_as_ycbcr, -1, 0)
-y_plane, cb_plane, cr_plane = planar_image_data
-cb_plane = cb_plane[::2, ::2]
-cr_plane = cr_plane[::2, ::2]
-planar_image_data_as_bytes = y_plane.tobytes() + cb_plane.tobytes() + cr_plane.tobytes()
-height, width = y_plane.shape
-(OUTPUTS_DIR_PATH / f"foreman_qcif_0_ycbcr.{width}x{height}.yuv").write_bytes(
-    planar_image_data_as_bytes
-)
 
 # Sub-sample the image in YPbPr color space using 4:2:0 scheme
 pass
