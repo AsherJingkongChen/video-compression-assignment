@@ -209,9 +209,9 @@ ssim_best = 1.0
 # Show the metrics
 print(
     """
-Task 1:
-  Convert an image from RGB to YCbCr420 and back.
-  Below are the metrics to compare the copied and transformed images:
+[Task 1]
+    Convert an image from RGB to YCbCr420 and back.
+    Below are the metrics to compare the copied and transformed images:
 """
 )
 pprint(
