@@ -13,7 +13,7 @@ OUTPUTS_DIR_PATH = OUTPUTS_DIR_PATH / "task_2"
 OUTPUTS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
 # Open the output file
-frames = open(OUTPUTS_DIR_PATH / "foreman_qcif_0-2_ycbcr.yuv420p.176x144.yuv", "wb")
+frames_raw_ycbcr = open(OUTPUTS_DIR_PATH / "foreman_qcif_0-2_ycbcr.yuv420p.176x144.yuv", "wb")
 
 for image_id in range(3):
     # Load the source image
@@ -111,7 +111,7 @@ for image_id in range(3):
 
     # Write the sub-sampled YCbCr image in the planar format (YUV420p)
     save_ycbcr_image(
-        frames,
+        frames_raw_ycbcr,
         (
             image_data_as_y_subsampled,
             image_data_as_cb_subsampled,
@@ -125,3 +125,5 @@ for image_id in range(3):
 
     # Images with and without sub-sampling have different sizes,
     # so the comparison is only available on visual inspection.
+
+frames_raw_ycbcr.close()
