@@ -205,12 +205,8 @@ class H273:
         )
         values = asarray(values, dtype=float32)
 
-        if bit_depth_y < 8:
-            raise ValueError("The bit depth y should be greater than or equal to 8")
-        if bit_depth_cb < 8:
-            raise ValueError("The bit depth cb should be greater than or equal to 8")
-        if bit_depth_cr < 8:
-            raise ValueError("The bit depth cr should be greater than or equal to 8")
+        if bit_depth_y < 8 or bit_depth_cb < 8 or bit_depth_cr < 8:
+            raise ValueError("The bit depth should be greater than or equal to 8")
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
 
@@ -285,12 +281,8 @@ class H273:
         )
         values = asarray(values, dtype=float32)
 
-        if bit_depth_y < 8:
-            raise ValueError("The bit depth y should be greater than or equal to 8")
-        if bit_depth_cb < 8:
-            raise ValueError("The bit depth cb should be greater than or equal to 8")
-        if bit_depth_cr < 8:
-            raise ValueError("The bit depth cr should be greater than or equal to 8")
+        if bit_depth_y < 8 or bit_depth_cb < 8 or bit_depth_cr < 8:
+            raise ValueError("The bit depth should be greater than or equal to 8")
         if values.shape[-1] != 3:
             raise ValueError("The input values should be in the shape of (..., 3)")
 
@@ -511,10 +503,11 @@ class H273:
         from numpy import clip
 
         bit_depth = int(bit_depth)
-        clipped_values = clip(values, 0, (1 << bit_depth) - 1)
 
         if bit_depth < 0:
             raise ValueError("The bit depth should be greater than or equal to 0")
+
+        clipped_values = clip(values, 0, (1 << bit_depth) - 1)
 
         if bit_depth <= 8:
             return clipped_values.astype(uint8)

@@ -7,7 +7,7 @@ from ..modules.data import (
     planar_from_packed,
     save_ycbcr_image,
 )
-from ..modules.sample import BT2100
+from ..modules.sample import BT2100, SUBSAMPLING_SCHEME_420
 
 OUTPUTS_DIR_PATH = OUTPUTS_DIR_PATH / "task_1"
 OUTPUTS_DIR_PATH.mkdir(parents=True, exist_ok=True)
@@ -27,43 +27,48 @@ assert (
 
 # Uses ITU-T H.273 and ITU-R BT.601 parameter values
 # - The source image is assumed to be gamma-corrected RGB
-color = H273()
-kr, kb = KR_KB_BT601()
+COLOR = H273()
+KR, KB = KR_KB_BT601()
 
-# Uses ITU-R BT.2100 parameter values
+# Uses ITU-R BT.2100 parameter values and sub-sampling scheme 4:2:0
 # - The sub-sampling methods are easier to implement
-sample = BT2100()
+SAMPLE = BT2100()
+SUBSAMPLING_SCHEME = SUBSAMPLING_SCHEME_420()
 
 # De-quanitze the image from digital RGB to analog RGB
-image_data_as_argb = color.set_full_range(True).dequantize_rgb(image_data_as_drgb)
+image_data_as_argb = COLOR.set_full_range(True).dequantize_rgb(image_data_as_drgb)
 
 # Convert the image from analog RGB to YPbPr
-image_data_as_ypbpr = color.ypbpr_from_rgb(image_data_as_argb, kr, kb)
+image_data_as_ypbpr = COLOR.ypbpr_from_rgb(image_data_as_argb, KR, KB)
 
 # Quantize the image from YPbPr to YCbCr
-image_data_as_ycbcr = color.set_full_range(False).quantize_ycbcr(image_data_as_ypbpr)
+image_data_as_ycbcr = COLOR.set_full_range(False).quantize_ycbcr(image_data_as_ypbpr)
 
 # Sub-sample the image in YCbCr color space using 4:2:0 scheme
 image_data_as_y, image_data_as_cb, image_data_as_cr = planar_from_packed(
     image_data_as_ycbcr
 )
 image_data_as_y_subsampled = image_data_as_y.copy()
-image_data_as_cb_subsampled = sample.subsample_420(
+image_data_as_cb_subsampled = SAMPLE.subsample(
+    SUBSAMPLING_SCHEME,
     image_data_as_y,
     image_data_as_cb,
 )
-image_data_as_cr_subsampled = sample.subsample_420(
+image_data_as_cr_subsampled = SAMPLE.subsample(
+    SUBSAMPLING_SCHEME,
     image_data_as_y,
     image_data_as_cr,
 )
 
 # Up-sample the image in YCbCr color space from 4:2:0 to 4:4:4 scheme
 image_data_as_y_upsampled = image_data_as_y_subsampled.copy()
-image_data_as_cb_upsampled = sample.upsample_420(
+image_data_as_cb_upsampled = SAMPLE.upsample(
+    SUBSAMPLING_SCHEME,
     image_data_as_y_subsampled,
     image_data_as_cb_subsampled,
 )
-image_data_as_cr_upsampled = sample.upsample_420(
+image_data_as_cr_upsampled = SAMPLE.upsample(
+    SUBSAMPLING_SCHEME,
     image_data_as_y_subsampled,
     image_data_as_cr_subsampled,
 )
@@ -76,17 +81,17 @@ image_data_as_ycbcr_upsampled = packed_from_planar(
 )
 
 # De-quantize the image from YCbCr to YPbPr
-image_data_as_ypbpr_transformed = color.set_full_range(False).dequantize_ycbcr(
+image_data_as_ypbpr_transformed = COLOR.set_full_range(False).dequantize_ycbcr(
     image_data_as_ycbcr_upsampled
 )
 
 # Convert the image from YPbPr to analog RGB
-image_data_as_argb_transformed = color.rgb_from_ypbpr(
-    image_data_as_ypbpr_transformed, kr, kb
+image_data_as_argb_transformed = COLOR.rgb_from_ypbpr(
+    image_data_as_ypbpr_transformed, KR, KB
 )
 
 # Quantize the image from analog RGB to digital RGB
-image_data_as_drgb_transformed = color.set_full_range(True).quantize_rgb(
+image_data_as_drgb_transformed = COLOR.set_full_range(True).quantize_rgb(
     image_data_as_argb_transformed
 )
 
