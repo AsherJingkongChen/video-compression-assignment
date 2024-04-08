@@ -64,8 +64,8 @@ for image_data_as_ycbcr_quantized in images_data_as_ycbcr_quantized:
         )
         image_data_as_ycbcr_encoded += (image_data_as_plane_encoded,)
     images_data_as_ycbcr_encoded.append("".join(image_data_as_ycbcr_encoded))
-b = Bits(bin="".join(images_data_as_ycbcr_encoded))
-pprint(b)
+encoded_bits = Bits(bin="".join(images_data_as_ycbcr_encoded))
+pprint(encoded_bits[-512:])
 
 # # Save the encoded YCbCr image with the huffman codebook into a bitstream
 # bitstream_encoded = (huffman_codebook, images_data_as_ycbcr_encoded)
@@ -95,32 +95,20 @@ pprint(b)
 #             image_data_as_cr_decoded,
 #         )
 #     )
-images_data_as_ycbcr_decoded = images_data_as_ycbcr_quantized  # [TODO]
+images_data_as_ycbcr_decoded = images_data_as_ycbcr_quantized # [TODO]
 
 # De-quantize the decoded YCbCr images in 16 levels evenly
 images_data_as_ycbcr_dequantized: ImagesData = []
 for image_data_as_ycbcr_decoded in images_data_as_ycbcr_decoded:
-    image_data_as_y_decoded, image_data_as_cb_decoded, image_data_as_cr_decoded = (
-        image_data_as_ycbcr_decoded
-    )
-
-    image_data_as_y_dequantized = quantize_evenly(
-        image_data_as_y_decoded, QUANTIZATION_LEVELS, *QUANTIZATION_RANGES[::-1]
-    ).astype(uint8)
-    image_data_as_cb_dequantized = quantize_evenly(
-        image_data_as_cb_decoded, QUANTIZATION_LEVELS, *QUANTIZATION_RANGES[::-1]
-    ).astype(uint8)
-    image_data_as_cr_dequantized = quantize_evenly(
-        image_data_as_cr_decoded, QUANTIZATION_LEVELS, *QUANTIZATION_RANGES[::-1]
-    ).astype(uint8)
-
-    images_data_as_ycbcr_dequantized.append(
-        (
-            image_data_as_y_dequantized,
-            image_data_as_cb_dequantized,
-            image_data_as_cr_dequantized,
-        )
-    )
+    image_data_as_ycbcr_dequantized = ()
+    for image_data_as_plane_decoded in image_data_as_ycbcr_decoded:
+        image_data_as_plane_dequantized = quantize_evenly(
+            image_data_as_plane_decoded,
+            QUANTIZATION_LEVELS,
+            *QUANTIZATION_RANGES[::-1],
+        ).astype(uint8)
+        image_data_as_ycbcr_dequantized += (image_data_as_plane_dequantized,)
+    images_data_as_ycbcr_dequantized.append(image_data_as_ycbcr_dequantized)
 
 ############################
 ###  Save the artifacts  ###
@@ -152,5 +140,5 @@ print(
 Graph TD\
 """
 )
-pprint(coding_tree)
+# pprint(coding_tree)
 print("```")
