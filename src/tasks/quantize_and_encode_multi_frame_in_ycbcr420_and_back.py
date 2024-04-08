@@ -8,6 +8,9 @@ from ..modules.data import (
     save_ycbcr_image,
 )
 from ..modules.sample import BT2100
+from .convert_multi_frame_from_rgb_to_ycbcr420 import frames_raw_ycbcr_path
 
 OUTPUTS_DIR_PATH = OUTPUTS_DIR_PATH / "task_3"
 OUTPUTS_DIR_PATH.mkdir(parents=True, exist_ok=True)
+
+print(frames_raw_ycbcr_path.exists())

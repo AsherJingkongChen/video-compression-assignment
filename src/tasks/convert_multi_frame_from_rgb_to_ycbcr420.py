@@ -2,20 +2,15 @@ from PIL import Image
 from numpy import array, uint8
 from .utils.env import ASSETS_DIR_PATH, OUTPUTS_DIR_PATH
 from ..modules.color import H273, KR_KB_BT601
-from ..modules.data import (
-    packed_from_planar,
-    planar_from_packed,
-    save_ycbcr_image,
-)
+from ..modules.data import planar_from_packed, save_ycbcr_image
 from ..modules.sample import BT2100, SUBSAMPLING_SCHEME_420
 
 OUTPUTS_DIR_PATH = OUTPUTS_DIR_PATH / "task_2"
 OUTPUTS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
-# Open the output file
-frames_raw_ycbcr = open(
-    OUTPUTS_DIR_PATH / "foreman_qcif_0-2_ycbcr.yuv420p.176x144.yuv", "wb"
-)
+# Open the output file for writing the raw YCbCr frames
+frames_raw_ycbcr_path = OUTPUTS_DIR_PATH / "foreman_qcif_0-2_ycbcr.yuv420p.yuv"
+frames_raw_ycbcr = frames_raw_ycbcr_path.open("wb")
 
 for image_id in range(3):
     # Load the source image
