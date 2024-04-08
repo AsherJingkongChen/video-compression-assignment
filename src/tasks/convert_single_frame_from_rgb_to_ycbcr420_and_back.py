@@ -25,9 +25,10 @@ assert (
     image_must_be_full_range
 ), "The source image is assumed to be in the full range RGB color space"
 
-# Uses ITU-R BT.601 parameter values
+# Uses ITU-T H.273 and ITU-R BT.601 parameter values
 # - The source image is assumed to be gamma-corrected RGB
 color = H273()
+kr, kb = KR_KB_BT601()
 
 # Uses ITU-R BT.2100 parameter values
 # - The sub-sampling methods are easier to implement
@@ -37,7 +38,6 @@ sample = BT2100()
 image_data_as_argb = color.set_full_range(True).dequantize_rgb(image_data_as_drgb)
 
 # Convert the image from analog RGB to YPbPr
-kr, kb = KR_KB_BT601()
 image_data_as_ypbpr = color.ypbpr_from_rgb(image_data_as_argb, kr, kb)
 
 # Quantize the image from YPbPr to YCbCr
@@ -200,9 +200,15 @@ mse_best = 0.0
 nrmse_best = 0.0
 psnr_best = Inf
 ssim_best = 1.0
-xae_best = 0.0
 
 # Show the metrics
+print(
+    """
+Task 1: Convert an image from RGB to YCbCr420 and back.
+
+Below are the metrics to compare the copied and transformed images:
+"""
+)
 pprint(
     [
         ["<Metrics>", "<Score>", "<Maximum>"],

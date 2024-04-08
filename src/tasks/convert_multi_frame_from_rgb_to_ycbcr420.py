@@ -29,9 +29,10 @@ for image_id in range(3):
         image_must_be_full_range
     ), "The source image is assumed to be in the full range RGB color space"
 
-    # Uses ITU-R BT.601 parameter values
+    # Uses ITU-T H.273 and ITU-R BT.601 parameter values
     # - The source image is assumed to be gamma-corrected RGB
     color = H273()
+    kr, kb = KR_KB_BT601()
 
     # Uses ITU-R BT.2100 parameter values
     # - The sub-sampling methods are easier to implement
@@ -41,7 +42,6 @@ for image_id in range(3):
     image_data_as_argb = color.set_full_range(True).dequantize_rgb(image_data_as_drgb)
 
     # Convert the image from analog RGB to YPbPr
-    kr, kb = KR_KB_BT601()
     image_data_as_ypbpr = color.ypbpr_from_rgb(image_data_as_argb, kr, kb)
 
     # Quantize the image from YPbPr to YCbCr
@@ -119,43 +119,9 @@ for image_id in range(3):
         ),
     )
 
-##################
-###  Analysis  ###
-##################
+    ##################
+    ###  Analysis  ###
+    ##################
 
-# from pprint import pprint
-# from numpy import Inf, int16
-# from skimage.metrics import (
-#     mean_squared_error as get_mse,
-#     normalized_root_mse as get_nrmse,
-#     peak_signal_noise_ratio as get_psnr,
-#     structural_similarity as get_ssim,
-# )
-
-# image_copied_data = array(image_copied, dtype=uint8)
-# image_transformed_data = array(image_transformed, dtype=uint8)
-
-# mae = abs(image_copied_data.astype(int16) - image_transformed_data.astype(int16)).mean()
-# mse = get_mse(image_copied_data, image_transformed_data)
-# nrmse = get_nrmse(image_copied_data, image_transformed_data)
-# psnr = get_psnr(image_copied_data, image_transformed_data)
-# ssim = get_ssim(image_copied_data, image_transformed_data, channel_axis=-1)
-
-# mae_best = 0.0
-# mse_best = 0.0
-# nrmse_best = 0.0
-# psnr_best = Inf
-# ssim_best = 1.0
-# xae_best = 0.0
-
-# # Show the metrics
-# pprint(
-#     [
-#         ["<Metrics>", "<Score>", "<Maximum>"],
-#         ["MAE", f"{mae:.5f}", f"{mae_best:.5f}"],
-#         ["MSE", f"{mse:.5f}", f"{mse_best:.5f}"],
-#         ["NRMSE", f"{nrmse:.5f}", f"{nrmse_best:.5f}"],
-#         ["PSNR", f"{psnr:.5f}", f"{psnr_best:.5f}"],
-#         ["SSIM", f"{ssim:.5f}", f"{ssim_best:.5f}"],
-#     ]
-# )
+    # Images with and without sub-sampling have different sizes,
+    # so the comparison is only available on visual inspection.
