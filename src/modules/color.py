@@ -2,7 +2,7 @@ from numpy import float32, uint8, uint16, uint32, uint64
 from numpy.typing import ArrayLike, NDArray
 from typing import Iterable, Tuple
 
-from .typing import uintlike
+from .typing import get_uint_type, uintlike
 
 
 class H273:
@@ -508,17 +508,9 @@ class H273:
             raise ValueError("The bit depth should be greater than or equal to 0")
 
         clipped_values = clip(values, 0, (1 << bit_depth) - 1)
+        casted_values = clipped_values.astype(get_uint_type(bit_depth))
 
-        if bit_depth <= 8:
-            return clipped_values.astype(uint8)
-        elif bit_depth <= 16:
-            return clipped_values.astype(uint16)
-        elif bit_depth <= 32:
-            return clipped_values.astype(uint32)
-        elif bit_depth <= 64:
-            return clipped_values.astype(uint64)
-        else:
-            raise NotImplementedError("The bit depth is too large")
+        return casted_values
 
 
 def KR_KB_BT601() -> Tuple[float, float]:
