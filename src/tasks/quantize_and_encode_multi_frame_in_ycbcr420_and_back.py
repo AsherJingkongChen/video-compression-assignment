@@ -1,7 +1,8 @@
+from bitstring import Bits
 from collections import Counter
 from itertools import chain
 from pprint import pprint
-from numpy import load, ndarray, ravel, uint8, savez
+from numpy import array, fromiter, load, ravel, uint8, savez
 from numpy.typing import NDArray
 from typing import List, Tuple, TypeAlias
 
@@ -29,25 +30,15 @@ QUANTIZATION_RANGES = [(16, 240), (0, QUANTIZATION_LEVELS - 1)]
 # Quantize the YCbCr images to 16 levels evenly
 images_data_as_ycbcr_quantized: ImagesData = []
 for image_data_as_ycbcr in images_data_as_ycbcr:
-    image_data_as_y, image_data_as_cb, image_data_as_cr = image_data_as_ycbcr
-
-    image_data_as_y_quantized = quantize_evenly(
-        image_data_as_y, QUANTIZATION_LEVELS, *QUANTIZATION_RANGES
-    ).astype(uint8)
-    image_data_as_cb_quantized = quantize_evenly(
-        image_data_as_cb, QUANTIZATION_LEVELS, *QUANTIZATION_RANGES
-    ).astype(uint8)
-    image_data_as_cr_quantized = quantize_evenly(
-        image_data_as_cr, QUANTIZATION_LEVELS, *QUANTIZATION_RANGES
-    ).astype(uint8)
-
-    images_data_as_ycbcr_quantized.append(
-        (
-            image_data_as_y_quantized,
-            image_data_as_cb_quantized,
-            image_data_as_cr_quantized,
-        )
-    )
+    image_data_as_ycbcr_quantized = ()
+    for image_data_as_plane in image_data_as_ycbcr:
+        image_data_as_plane_quantized = quantize_evenly(
+            image_data_as_plane,
+            QUANTIZATION_LEVELS,
+            *QUANTIZATION_RANGES,
+        ).astype(uint8)
+        image_data_as_ycbcr_quantized += (image_data_as_plane_quantized,)
+    images_data_as_ycbcr_quantized.append(image_data_as_ycbcr_quantized)
 
 # Build a Huffman tree and codebook for the quantized YCbCr images
 frequencies_and_quantization_levels = [
@@ -58,30 +49,23 @@ frequencies_and_quantization_levels = [
 ]
 coding_tree = HuffmanTree.from_symbolic_frequencies(frequencies_and_quantization_levels)
 quantization_levels_and_codes = list(coding_tree.codebook)
-d = {k: len(v) for k, v in (quantization_levels_and_codes)}
-compressed_nbytes = sum({k: d[v] * k for k, v in frequencies_and_quantization_levels}.values()) // 8
-uncompressed_nbytes = sum(chain(map(lambda a: a.nbytes, chain(*images_data_as_ycbcr_quantized))))
-pprint(frequencies_and_quantization_levels)
-pprint(uncompressed_nbytes / compressed_nbytes)
-# Encode the quantized YCbCr image using Huffman coding scheme
-# images_data_as_ycbcr_encoded = []
-# for image_data_as_ycbcr_quantized in images_data_as_ycbcr_quantized:
-#     (
-#         image_data_as_y_quantized,
-#         image_data_as_cb_quantized,
-#         image_data_as_cr_quantized,
-#     ) = image_data_as_ycbcr_quantized
+quantization_level_to_code_table = dict(quantization_levels_and_codes)
 
-#     image_data_as_y_encoded = image_data_as_y_quantized
-#     image_data_as_cb_encoded = image_data_as_cb_quantized
-#     image_data_as_cr_encoded = image_data_as_cr_quantized
-#     image_data_as_ycbcr_encoded = huffman_tree(
-#         image_data_as_y_encoded,
-#         image_data_as_cb_encoded,
-#         image_data_as_cr_encoded,
-#     )
-
-#     images_data_as_ycbcr_encoded.append(image_data_as_ycbcr_encoded)
+# Encode the quantized YCbCr images using Huffman coding scheme
+images_data_as_ycbcr_encoded: List[bytes] = []
+for image_data_as_ycbcr_quantized in images_data_as_ycbcr_quantized:
+    image_data_as_ycbcr_encoded = ()
+    for image_data_as_plane_quantized in image_data_as_ycbcr_quantized:
+        image_data_as_plane_encoded = "".join(
+            map(
+                dict(quantization_levels_and_codes).get,
+                image_data_as_plane_quantized.ravel(),
+            )
+        )
+        image_data_as_ycbcr_encoded += (image_data_as_plane_encoded,)
+    images_data_as_ycbcr_encoded.append("".join(image_data_as_ycbcr_encoded))
+b = Bits(bin="".join(images_data_as_ycbcr_encoded))
+pprint(b)
 
 # # Save the encoded YCbCr image with the huffman codebook into a bitstream
 # bitstream_encoded = (huffman_codebook, images_data_as_ycbcr_encoded)
@@ -146,3 +130,27 @@ for image_data_as_ycbcr_decoded in images_data_as_ycbcr_decoded:
 # dequantized frames
 # decoded frames
 # encoded bitstream
+
+##################
+###  Analysis  ###
+##################
+
+print(
+    """
+[Task 3]
+    Quantize and encode YCbCr 4:2:0 images and recover them back.
+    Below is the mapping table from quantization level to code:
+"""
+)
+pprint(quantization_level_to_code_table)
+print(
+    """
+    Below is the Huffman coding tree in Mermaid diagram syntax:
+
+```mermaid
+
+Graph TD\
+"""
+)
+pprint(coding_tree)
+print("```")
