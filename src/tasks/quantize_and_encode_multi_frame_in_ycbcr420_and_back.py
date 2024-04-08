@@ -98,7 +98,7 @@ for image_data_as_ycbcr in images_data_as_ycbcr:
 #             image_data_as_cr_decoded,
 #         )
 #     )
-images_data_as_ycbcr_decoded = images_data_as_ycbcr_quantized
+images_data_as_ycbcr_decoded = images_data_as_ycbcr_quantized # [TODO]
 
 # De-quantize the decoded YCbCr images in 16 levels evenly
 images_data_as_ycbcr_dequantized: ImagesData = []
