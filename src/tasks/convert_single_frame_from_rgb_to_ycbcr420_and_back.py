@@ -168,9 +168,9 @@ height, width = image_data_as_y_subsampled.shape
 with open(
     OUTPUTS_DIR_PATH / f"foreman_qcif_0_ycbcr.yuv420p.{width}x{height}.yuv",
     mode="wb",
-) as file:
+) as image_ycbcr:
     save_ycbcr_image(
-        file,
+        image_ycbcr,
         (
             image_data_as_y_subsampled,
             image_data_as_cb_subsampled,

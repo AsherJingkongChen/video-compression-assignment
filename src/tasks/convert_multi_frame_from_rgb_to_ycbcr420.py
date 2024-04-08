@@ -1,19 +1,26 @@
 from PIL import Image
 from numpy import array, uint8
+from numpy.typing import NDArray
+from typing import List, Tuple
+
 from .utils.env import ASSETS_DIR_PATH, OUTPUTS_DIR_PATH
 from ..modules.color import H273, KR_KB_BT601
 from ..modules.data import planar_from_packed, save_ycbcr_image
 from ..modules.sample import BT2100, SUBSAMPLING_SCHEME_420
 
+__all__ = ["images_data_as_ycbcr"]
 OUTPUTS_DIR_PATH = OUTPUTS_DIR_PATH / "task_2"
 OUTPUTS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
-# Open the output file for writing the raw YCbCr frames
-width, height = 176, 144
-frames_raw_ycbcr_path = (
-    OUTPUTS_DIR_PATH / f"foreman_qcif_0-2_ycbcr.yuv420p.{width}x{height}.yuv"
-)
-frames_raw_ycbcr = frames_raw_ycbcr_path.open("wb")
+# The sub-sampled YCbCr images will be saved in the memory
+# - The next task will use these images
+images_data_as_ycbcr: List[
+    Tuple[
+        NDArray[uint8],
+        NDArray[uint8],
+        NDArray[uint8],
+    ]
+] = []
 
 for image_id in range(3):
     # Load the source image
@@ -66,6 +73,15 @@ for image_id in range(3):
         image_data_as_cr,
     )
 
+    # Save the multiple sub-sampled YCbCr images in the memory
+    images_data_as_ycbcr.append(
+        (
+            image_data_as_y_subsampled,
+            image_data_as_cb_subsampled,
+            image_data_as_cr_subsampled,
+        )
+    )
+
     ############################
     ###  Save the artifacts  ###
     ############################
@@ -114,21 +130,18 @@ for image_id in range(3):
         / f"foreman_qcif_{image_id}_cr_with_subsampling.{width}x{height}.bmp"
     )
 
-    # Write the sub-sampled YCbCr image in the planar format (YUV420p)
-    save_ycbcr_image(
-        frames_raw_ycbcr,
-        (
-            image_data_as_y_subsampled,
-            image_data_as_cb_subsampled,
-            image_data_as_cr_subsampled,
-        ),
-    )
+# Save the sub-sampled YCbCr image in the planar format (YUV420p)
+height, width = images_data_as_ycbcr[0][0].shape
+with open(
+    OUTPUTS_DIR_PATH / f"foreman_qcif_0-2_ycbcr.yuv420p.{width}x{height}.yuv",
+    mode="wb",
+) as images_ycbcr:
+    for image_data_ycbcr in images_data_as_ycbcr:
+        save_ycbcr_image(images_ycbcr, image_data_ycbcr)
 
-    ##################
-    ###  Analysis  ###
-    ##################
+##################
+###  Analysis  ###
+##################
 
-    # Images with and without sub-sampling have different sizes,
-    # so the comparison is only available on visual inspection.
-
-frames_raw_ycbcr.close()
+# Images with and without sub-sampling have different sizes,
+# so the comparison is only available on visual inspection.
