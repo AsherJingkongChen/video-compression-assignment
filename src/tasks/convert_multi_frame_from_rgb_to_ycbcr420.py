@@ -22,6 +22,16 @@ images_data_as_ycbcr: List[
     ]
 ] = []
 
+# Uses ITU-T H.273 and ITU-R BT.601 parameter values
+# - The source image is assumed to be gamma-corrected RGB
+COLOR = H273()
+KR, KB = KR_KB_BT601()
+
+# Uses ITU-R BT.2100 parameter values and sub-sampling scheme 4:2:0
+# - The sub-sampling methods are easier to implement
+SAMPLE = BT2100()
+SUBSAMPLING_SCHEME = SUBSAMPLING_SCHEME_420()
+
 for image_id in range(3):
     # Load the source image
     image = Image.open(ASSETS_DIR_PATH / f"foreman_qcif_{image_id}_rgb.bmp")
@@ -35,16 +45,6 @@ for image_id in range(3):
     assert (
         image_must_be_full_range
     ), "The source image is assumed to be in the full range RGB color space"
-
-    # Uses ITU-T H.273 and ITU-R BT.601 parameter values
-    # - The source image is assumed to be gamma-corrected RGB
-    COLOR = H273()
-    KR, KB = KR_KB_BT601()
-
-    # Uses ITU-R BT.2100 parameter values and sub-sampling scheme 4:2:0
-    # - The sub-sampling methods are easier to implement
-    SAMPLE = BT2100()
-    SUBSAMPLING_SCHEME = SUBSAMPLING_SCHEME_420()
 
     # De-quanitze the image from digital RGB to analog RGB
     image_data_as_argb = COLOR.set_full_range(True).dequantize_rgb(image_data_as_drgb)

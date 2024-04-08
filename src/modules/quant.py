@@ -19,21 +19,21 @@ def quantize_evenly(
     ## Examples
 
         ```python
-        from numpy import array
+from numpy import array
 
-        values = array([0, 7, 8, 10, 15, 16, 254, 255, 56, 57], dtype=int)
-        quantized_values = quantize_evenly(
-            values,
-            levels=32,
-            source_range=(0, 255),
-            target_range=(0, 31),
-        ).astype(int)
+values = array([0, 7, 8, 10, 15, 16, 254, 255, 56, 57], dtype=int)
+quantized_values = quantize_evenly(
+    values,
+    levels=32,
+    source_range=(0, 255),
+    target_range=(0, 31),
+).astype(int)
 
-        print(values.tolist())
-        print(quantized_values.tolist())
+print(values.tolist())
+print(quantized_values.tolist())
 
-        assert quantized_values.tolist() == [0, 0, 1, 1, 1, 2, 31, 31, 7, 7]
-        assert quantized_values.tolist() == (values // (256 // 32)).tolist()
+assert quantized_values.tolist() == [0, 0, 1, 1, 1, 2, 31, 31, 7, 7]
+assert quantized_values.tolist() == (values // (256 // 32)).tolist()
         ```
 
     ## Returns
