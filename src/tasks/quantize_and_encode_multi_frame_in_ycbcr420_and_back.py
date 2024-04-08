@@ -1,7 +1,7 @@
 from collections import Counter
 from itertools import chain
 from pprint import pprint
-from numpy import ravel, uint8
+from numpy import load, ndarray, ravel, uint8, savez
 from numpy.typing import NDArray
 from typing import List, Tuple, TypeAlias
 
@@ -50,16 +50,20 @@ for image_data_as_ycbcr in images_data_as_ycbcr:
     )
 
 # Build a Huffman tree and codebook for the quantized YCbCr images
-quantization_level_frequencies = [
+frequencies_and_quantization_levels = [
     (frequency, level)
     for level, frequency in Counter(
-        chain(*map(ravel, chain(*images_data_as_ycbcr_quantized),))
+        chain(*map(ravel, chain(*images_data_as_ycbcr_quantized)))
     ).items()
 ]
-coding_tree = HuffmanTree.from_symbolic_frequencies(quantization_level_frequencies)
-coding_code = coding_tree.codebook
-
-# # Encode the quantized YCbCr image using Huffman coding scheme
+coding_tree = HuffmanTree.from_symbolic_frequencies(frequencies_and_quantization_levels)
+quantization_levels_and_codes = list(coding_tree.codebook)
+d = {k: len(v) for k, v in (quantization_levels_and_codes)}
+compressed_nbytes = sum({k: d[v] * k for k, v in frequencies_and_quantization_levels}.values()) // 8
+uncompressed_nbytes = sum(chain(map(lambda a: a.nbytes, chain(*images_data_as_ycbcr_quantized))))
+pprint(frequencies_and_quantization_levels)
+pprint(uncompressed_nbytes / compressed_nbytes)
+# Encode the quantized YCbCr image using Huffman coding scheme
 # images_data_as_ycbcr_encoded = []
 # for image_data_as_ycbcr_quantized in images_data_as_ycbcr_quantized:
 #     (
