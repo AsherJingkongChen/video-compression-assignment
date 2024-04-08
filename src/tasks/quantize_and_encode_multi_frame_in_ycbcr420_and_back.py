@@ -1,9 +1,12 @@
+from collections import Counter
+from itertools import chain
 from pprint import pprint
-from numpy import uint8
+from numpy import ravel, uint8
 from numpy.typing import NDArray
 from typing import List, Tuple, TypeAlias
 
-from .utils.env import ASSETS_DIR_PATH, OUTPUTS_DIR_PATH
+from .utils.env import OUTPUTS_DIR_PATH
+from ..modules.coding import HuffmanTree
 from ..modules.quant import quantize_evenly
 from ..modules.sample import SUBSAMPLING_SCHEME_420
 
@@ -46,9 +49,15 @@ for image_data_as_ycbcr in images_data_as_ycbcr:
         )
     )
 
-# # Build a Huffman tree and codebook for the quantized YCbCr images
-# huffman_tree = images_data_as_ycbcr_quantized
-# huffman_codebook = huffman_tree
+# Build a Huffman tree and codebook for the quantized YCbCr images
+quantization_level_frequencies = [
+    (frequency, level)
+    for level, frequency in Counter(
+        chain(*map(ravel, chain(*images_data_as_ycbcr_quantized),))
+    ).items()
+]
+coding_tree = HuffmanTree.from_symbolic_frequencies(quantization_level_frequencies)
+coding_code = coding_tree.codebook
 
 # # Encode the quantized YCbCr image using Huffman coding scheme
 # images_data_as_ycbcr_encoded = []
@@ -98,7 +107,7 @@ for image_data_as_ycbcr in images_data_as_ycbcr:
 #             image_data_as_cr_decoded,
 #         )
 #     )
-images_data_as_ycbcr_decoded = images_data_as_ycbcr_quantized # [TODO]
+images_data_as_ycbcr_decoded = images_data_as_ycbcr_quantized  # [TODO]
 
 # De-quantize the decoded YCbCr images in 16 levels evenly
 images_data_as_ycbcr_dequantized: ImagesData = []
@@ -124,8 +133,6 @@ for image_data_as_ycbcr_decoded in images_data_as_ycbcr_decoded:
             image_data_as_cr_dequantized,
         )
     )
-
-pprint(sorted(set(images_data_as_ycbcr_dequantized[0][0].ravel())))
 
 ############################
 ###  Save the artifacts  ###
