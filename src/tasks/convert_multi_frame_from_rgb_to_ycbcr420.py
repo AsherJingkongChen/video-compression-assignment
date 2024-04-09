@@ -190,36 +190,53 @@ print(
 Convert the multiple images from RGB to YCbCr `4:2:0` color space
 and pack them into a planar format.
 
-"""
-)
-print(
-    """\
 ### Comparison between the images with and without sub-sampling
 
 The sub-sampled images are re-mapped from YCbCr to grayscale color space
 for visualization purposes.
+
+The up-sampled images are for comparison purposes.
 """
 )
 print(
-    f"""\
-- The original image:
+    "".join(f"""\
+The original image `{id}` in the RGB color space:
 
-    [![](../assets/foreman_qcif_0_rgb.bmp)](../assets/foreman_qcif_0_rgb.bmp)
+[![](../assets/foreman_qcif_{id}_rgb.bmp)](../assets/foreman_qcif_{id}_rgb.bmp)
 
-- The images at Y plane in the order of **without sub-sampling, with sub-sampling and with up-sampling**:
+The transformed images on different Y, Cb and Cr planes
+from `{id}` in the grayscale colorspace:
 
-    [![](../outputs/task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)
-    [![](../outputs/task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)
-    [![](../outputs/task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)
-{
-    "".join(f'''
-- The images at C{d} plane in the order of **without sub-sampling, with sub-sampling and with up-sampling**:
+|             | Without sub-sampling | With sub-sampling | With up-sampling |
+| ----------- | -------------------- | ----------------- | ---------------- |
+| On Y plane  | [![](./task_2/foreman_qcif_{id}_y_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_y_without_subsampling.176x144.bmp)   | [![](./task_2/foreman_qcif_{id}_y_with_subsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_y_with_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_{id}_y_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_y_with_uppampling.176x144.bmp)   |
+| On Cb plane | [![](./task_2/foreman_qcif_{id}_cb_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cb_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_{id}_cb_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_{id}_cb_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_{id}_cb_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cb_with_upsampling.176x144.bmp) |
+| On Cr plane | [![](./task_2/foreman_qcif_{id}_cr_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cr_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_{id}_cr_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_{id}_cr_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_{id}_cr_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cr_with_upsampling.176x144.bmp) |
 
-    [![](../outputs/task_2/foreman_qcif_0_c{d}_without_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_c{d}_without_subsampling.176x144.bmp)
-    [![](../outputs/task_2/foreman_qcif_0_c{d}_with_subsampling.88x72.bmp)](../outputs/task_2/foreman_qcif_0_c{d}_with_subsampling.88x72.bmp)
-    [![](../outputs/task_2/foreman_qcif_0_c{d}_with_upsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_c{d}_with_upsampling.176x144.bmp)
-'''
-    for d in ("b", "r"))
-}\
+""" for id in range(3))
+)
+print(
+    """\
+### Details
+
+The workflow is as follows:
+
+```mermaid
+graph LR
+    drgb[/Digital RGB Image 0~255/]
+    argb([Analog RGB Image 0.~1.])
+    tran[Transform RGB to YPbPr with BT.601]
+    ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
+    dyuv[/Digital YCbCr Image 16~235; 16~240/]
+    sub[Sub-sampling 4:2:0]
+    pack[Pack YCbCr frames in YUV420p format]
+
+    drgb -->|1| argb
+    argb -->|2| tran
+    tran -->|3| ayuv
+    ayuv -->|4| dyuv
+    dyuv -->|5| sub
+    sub -->|6| pack
+```
 """
 )

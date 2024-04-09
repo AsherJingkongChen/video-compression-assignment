@@ -4,8 +4,8 @@
 
 Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
-Below are the metrics to compare
-the copied and transformed images in the RGB color space:
+Below are the comparison metrics,
+they are computed from the copied and transformed images in the RGB color space:
 
 ```python
 [['<Metrics>', '<Score>', '<Goal>'],
@@ -16,38 +16,122 @@ the copied and transformed images in the RGB color space:
  ['SSIM', '0.99853', '1.00000']]
 ```
 
+The copied image *(from the original)* in the RGB color space:
+
+[![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)
+
+The transformed image in the RGB color space:
+
+[![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)
+
+The transformed image on different Y, Cb and Cr planes in the grayscale colorspace:
+
+|             | Before sub-sampling | After sub-sampling | After up-sampling |
+| ----------- | ------------------- | ------------------ | ----------------- |
+| On Y plane  | [![](./task_1/foreman_qcif_0_y_default.176x144.bmp)](./task_1/foreman_qcif_0_y_default.176x144.bmp)   | [![](./task_1/foreman_qcif_0_y_subsampled.176x144.bmp)](./task_1/foreman_qcif_0_y_subsampled.176x144.bmp) | [![](./task_1/foreman_qcif_0_y_upsampled.176x144.bmp)](./task_1/foreman_qcif_0_y_upsampled.176x144.bmp)   |
+| On Cb plane | [![](./task_1/foreman_qcif_0_cb_default.176x144.bmp)](./task_1/foreman_qcif_0_cb_default.176x144.bmp) | [![](./task_1/foreman_qcif_0_cb_subsampled.88x72.bmp)](./task_1/foreman_qcif_0_cb_subsampled.88x72.bmp)   | [![](./task_1/foreman_qcif_0_cb_upsampled.176x144.bmp)](./task_1/foreman_qcif_0_cb_upsampled.176x144.bmp) |
+| On Cr plane | [![](./task_1/foreman_qcif_0_cr_default.176x144.bmp)](./task_1/foreman_qcif_0_cr_default.176x144.bmp) | [![](./task_1/foreman_qcif_0_cr_subsampled.88x72.bmp)](./task_1/foreman_qcif_0_cr_subsampled.88x72.bmp)   | [![](./task_1/foreman_qcif_0_cr_upsampled.176x144.bmp)](./task_1/foreman_qcif_0_cr_upsampled.176x144.bmp) |
+
+### Details
+
+The workflow is as follows:
+
+```mermaid
+graph LR
+    drgb[/Digital RGB Image 0~255/]
+    argb([Analog RGB Image 0.~1.])
+    tran[Transform RGB to YPbPr with BT.601]
+    ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
+    dyuv[/Digital YCbCr Image 16~235; 16~240/]
+    sub[Sub-sampling 4:2:0]
+    ups[Up-sampling from 4:2:0 to 4:4:4]
+
+    drgb -->|1| argb
+    argb -->|2| tran
+    tran -->|3| ayuv
+    ayuv -->|4| dyuv
+    dyuv -->|5| sub
+    sub -->|6| ups
+    ups -->|7| dyuv
+    dyuv -->|8| ayuv
+    ayuv -->|9| tran
+    tran -->|10| argb
+    argb -->|11| drgb
+```
+
 ## Task 2
 
 Convert the multiple images from RGB to YCbCr `4:2:0` color space
 and pack them into a planar format.
-
 
 ### Comparison between the images with and without sub-sampling
 
 The sub-sampled images are re-mapped from YCbCr to grayscale color space
 for visualization purposes.
 
-- The original image:
+The up-sampled images are for comparison purposes.
 
-    [![](../assets/foreman_qcif_0_rgb.bmp)](../assets/foreman_qcif_0_rgb.bmp)
+The original image `0` in the RGB color space:
 
-- The images at Y plane in the order of **without sub-sampling, with sub-sampling and with up-sampling**:
+[![](../assets/foreman_qcif_0_rgb.bmp)](../assets/foreman_qcif_0_rgb.bmp)
 
-    [![](../outputs/task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)
-    [![](../outputs/task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)
-    [![](../outputs/task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)
+The transformed images on different Y, Cb and Cr planes
+from `0` in the grayscale colorspace:
 
-- The images at Cb plane in the order of **without sub-sampling, with sub-sampling and with up-sampling**:
+|             | Without sub-sampling | With sub-sampling | With up-sampling |
+| ----------- | -------------------- | ----------------- | ---------------- |
+| On Y plane  | [![](./task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)   | [![](./task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)](./task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_0_y_with_uppampling.176x144.bmp)   |
+| On Cb plane | [![](./task_2/foreman_qcif_0_cb_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_0_cb_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_0_cb_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_0_cb_with_upsampling.176x144.bmp) |
+| On Cr plane | [![](./task_2/foreman_qcif_0_cr_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_0_cr_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_0_cr_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_0_cr_with_upsampling.176x144.bmp) |
 
-    [![](../outputs/task_2/foreman_qcif_0_cb_without_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_cb_without_subsampling.176x144.bmp)
-    [![](../outputs/task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)](../outputs/task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)
-    [![](../outputs/task_2/foreman_qcif_0_cb_with_upsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_cb_with_upsampling.176x144.bmp)
+The original image `1` in the RGB color space:
 
-- The images at Cr plane in the order of **without sub-sampling, with sub-sampling and with up-sampling**:
+[![](../assets/foreman_qcif_1_rgb.bmp)](../assets/foreman_qcif_1_rgb.bmp)
 
-    [![](../outputs/task_2/foreman_qcif_0_cr_without_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_cr_without_subsampling.176x144.bmp)
-    [![](../outputs/task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)](../outputs/task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)
-    [![](../outputs/task_2/foreman_qcif_0_cr_with_upsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_cr_with_upsampling.176x144.bmp)
+The transformed images on different Y, Cb and Cr planes
+from `1` in the grayscale colorspace:
+
+|             | Without sub-sampling | With sub-sampling | With up-sampling |
+| ----------- | -------------------- | ----------------- | ---------------- |
+| On Y plane  | [![](./task_2/foreman_qcif_1_y_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_1_y_without_subsampling.176x144.bmp)   | [![](./task_2/foreman_qcif_1_y_with_subsampling.176x144.bmp)](./task_2/foreman_qcif_1_y_with_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_1_y_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_1_y_with_uppampling.176x144.bmp)   |
+| On Cb plane | [![](./task_2/foreman_qcif_1_cb_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_1_cb_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_1_cb_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_1_cb_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_1_cb_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_1_cb_with_upsampling.176x144.bmp) |
+| On Cr plane | [![](./task_2/foreman_qcif_1_cr_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_1_cr_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_1_cr_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_1_cr_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_1_cr_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_1_cr_with_upsampling.176x144.bmp) |
+
+The original image `2` in the RGB color space:
+
+[![](../assets/foreman_qcif_2_rgb.bmp)](../assets/foreman_qcif_2_rgb.bmp)
+
+The transformed images on different Y, Cb and Cr planes
+from `2` in the grayscale colorspace:
+
+|             | Without sub-sampling | With sub-sampling | With up-sampling |
+| ----------- | -------------------- | ----------------- | ---------------- |
+| On Y plane  | [![](./task_2/foreman_qcif_2_y_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_2_y_without_subsampling.176x144.bmp)   | [![](./task_2/foreman_qcif_2_y_with_subsampling.176x144.bmp)](./task_2/foreman_qcif_2_y_with_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_2_y_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_2_y_with_uppampling.176x144.bmp)   |
+| On Cb plane | [![](./task_2/foreman_qcif_2_cb_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_2_cb_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_2_cb_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_2_cb_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_2_cb_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_2_cb_with_upsampling.176x144.bmp) |
+| On Cr plane | [![](./task_2/foreman_qcif_2_cr_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_2_cr_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_2_cr_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_2_cr_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_2_cr_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_2_cr_with_upsampling.176x144.bmp) |
+
+
+### Details
+
+The workflow is as follows:
+
+```mermaid
+graph LR
+    drgb[/Digital RGB Image 0~255/]
+    argb([Analog RGB Image 0.~1.])
+    tran[Transform RGB to YPbPr with BT.601]
+    ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
+    dyuv[/Digital YCbCr Image 16~235; 16~240/]
+    sub[Sub-sampling 4:2:0]
+    pack[Pack YCbCr frames in YUV420p format]
+
+    drgb -->|1| argb
+    argb -->|2| tran
+    tran -->|3| ayuv
+    ayuv -->|4| dyuv
+    dyuv -->|5| sub
+    sub -->|6| pack
+```
 
 ## Task 3
 

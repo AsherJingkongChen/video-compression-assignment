@@ -182,7 +182,7 @@ with open(
 ###  Analysis  ###
 ##################
 
-from pprint import pprint
+from pprint import pformat
 from numpy import Inf, int16
 from skimage.metrics import (
     mean_squared_error as get_mse,
@@ -208,19 +208,18 @@ ssim_best = 1.0
 
 # Show the metrics
 print(
-    """\
+    f"""\
 # Assignment 1 Code Outputs
 
 ## Task 1
 
 Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
-Below are the metrics to compare
-the copied and transformed images in the RGB color space:
+Below are the comparison metrics,
+they are computed from the copied and transformed images in the RGB color space:
 
-```python"""
-)
-pprint(
+```python
+{pformat(
     [
         ["<Metrics>", "<Score>", "<Goal>"],
         ["MAE", f"{mae:.5f}", f"{mae_best:.5f}"],
@@ -229,7 +228,53 @@ pprint(
         ["PSNR", f"{psnr:.5f}", f"{psnr_best:.5f}"],
         ["SSIM", f"{ssim:.5f}", f"{ssim_best:.5f}"],
     ]
-)
-print("""\
+)}
 ```
-""")
+
+The copied image *(from the original)* in the RGB color space:
+
+[![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)
+
+The transformed image in the RGB color space:
+
+[![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)
+
+The transformed image on different Y, Cb and Cr planes in the grayscale colorspace:
+
+|             | Before sub-sampling | After sub-sampling | After up-sampling |
+| ----------- | ------------------- | ------------------ | ----------------- |
+| On Y plane  | [![](./task_1/foreman_qcif_0_y_default.176x144.bmp)](./task_1/foreman_qcif_0_y_default.176x144.bmp)   | [![](./task_1/foreman_qcif_0_y_subsampled.176x144.bmp)](./task_1/foreman_qcif_0_y_subsampled.176x144.bmp) | [![](./task_1/foreman_qcif_0_y_upsampled.176x144.bmp)](./task_1/foreman_qcif_0_y_upsampled.176x144.bmp)   |
+| On Cb plane | [![](./task_1/foreman_qcif_0_cb_default.176x144.bmp)](./task_1/foreman_qcif_0_cb_default.176x144.bmp) | [![](./task_1/foreman_qcif_0_cb_subsampled.88x72.bmp)](./task_1/foreman_qcif_0_cb_subsampled.88x72.bmp)   | [![](./task_1/foreman_qcif_0_cb_upsampled.176x144.bmp)](./task_1/foreman_qcif_0_cb_upsampled.176x144.bmp) |
+| On Cr plane | [![](./task_1/foreman_qcif_0_cr_default.176x144.bmp)](./task_1/foreman_qcif_0_cr_default.176x144.bmp) | [![](./task_1/foreman_qcif_0_cr_subsampled.88x72.bmp)](./task_1/foreman_qcif_0_cr_subsampled.88x72.bmp)   | [![](./task_1/foreman_qcif_0_cr_upsampled.176x144.bmp)](./task_1/foreman_qcif_0_cr_upsampled.176x144.bmp) |
+"""
+)
+print(
+    """\
+### Details
+
+The workflow is as follows:
+
+```mermaid
+graph LR
+    drgb[/Digital RGB Image 0~255/]
+    argb([Analog RGB Image 0.~1.])
+    tran[Transform RGB to YPbPr with BT.601]
+    ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
+    dyuv[/Digital YCbCr Image 16~235; 16~240/]
+    sub[Sub-sampling 4:2:0]
+    ups[Up-sampling from 4:2:0 to 4:4:4]
+
+    drgb -->|1| argb
+    argb -->|2| tran
+    tran -->|3| ayuv
+    ayuv -->|4| dyuv
+    dyuv -->|5| sub
+    sub -->|6| ups
+    ups -->|7| dyuv
+    dyuv -->|8| ayuv
+    ayuv -->|9| tran
+    tran -->|10| argb
+    argb -->|11| drgb
+```
+"""
+)
