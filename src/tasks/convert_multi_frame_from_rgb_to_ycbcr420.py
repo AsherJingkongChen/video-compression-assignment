@@ -73,13 +73,28 @@ for image_id in range(3):
         image_data_as_cr,
     )
 
-    # Save the multiple sub-sampled YCbCr images in the memory
+    # Save the multiple sub-sampled YCbCr images
+    # in the memory for the next task
     images_data_as_ycbcr.append(
         (
             image_data_as_y_subsampled,
             image_data_as_cb_subsampled,
             image_data_as_cr_subsampled,
         )
+    )
+
+    # Up-sample the sub-sampled image in YCbCr color space using 4:2:0 scheme
+    # - For comparison purposes
+    image_data_as_y_upsampled = image_data_as_y.copy()
+    image_data_as_cb_upsampled = SAMPLE.upsample(
+        SUBSAMPLING_SCHEME,
+        image_data_as_y_subsampled,
+        image_data_as_cb_subsampled,
+    )
+    image_data_as_cr_upsampled = SAMPLE.upsample(
+        SUBSAMPLING_SCHEME,
+        image_data_as_y_subsampled,
+        image_data_as_cr_subsampled,
     )
 
     ############################
@@ -130,6 +145,28 @@ for image_id in range(3):
         / f"foreman_qcif_{image_id}_cr_with_subsampling.{width}x{height}.bmp"
     )
 
+    # Save the Y, Cb and Cr images with up-sampling in the 8-bit grayscale BMP format
+    image_y_upsampled = Image.fromarray(image_data_as_y_upsampled, mode="L")
+    width, height = image_y_upsampled.size
+    image_y_upsampled.save(
+        OUTPUTS_DIR_PATH
+        / f"foreman_qcif_{image_id}_y_with_upsampling.{width}x{height}.bmp"
+    )
+
+    image_cb_upsampled = Image.fromarray(image_data_as_cb_upsampled, mode="L")
+    width, height = image_cb_upsampled.size
+    image_cb_upsampled.save(
+        OUTPUTS_DIR_PATH
+        / f"foreman_qcif_{image_id}_cb_with_upsampling.{width}x{height}.bmp"
+    )
+
+    image_cr_upsampled = Image.fromarray(image_data_as_cr_upsampled, mode="L")
+    width, height = image_cr_upsampled.size
+    image_cr_upsampled.save(
+        OUTPUTS_DIR_PATH
+        / f"foreman_qcif_{image_id}_cr_with_upsampling.{width}x{height}.bmp"
+    )
+
 # Save the sub-sampled YCbCr image in the planar format (YUV420p)
 height, width = images_data_as_ycbcr[0][0].shape
 with open(
@@ -145,3 +182,44 @@ with open(
 
 # Images with and without sub-sampling have different sizes,
 # so the comparison is only available on visual inspection.
+
+print(
+    """\
+## Task 2
+
+Convert the multiple images from RGB to YCbCr `4:2:0` color space
+and pack them into a planar format.
+
+"""
+)
+print(
+    """\
+### Comparison between the images with and without sub-sampling
+
+The sub-sampled images are re-mapped from YCbCr to grayscale color space
+for visualization purposes.
+"""
+)
+print(
+    f"""\
+- The original image:
+
+    [![](../assets/foreman_qcif_0_rgb.bmp)](../assets/foreman_qcif_0_rgb.bmp)
+
+- The images at Y plane in the order of **without sub-sampling, with sub-sampling and with up-sampling**:
+
+    [![](../outputs/task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)
+    [![](../outputs/task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)
+    [![](../outputs/task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)
+{
+    "".join(f'''
+- The images at C{d} plane in the order of **without sub-sampling, with sub-sampling and with up-sampling**:
+
+    [![](../outputs/task_2/foreman_qcif_0_c{d}_without_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_c{d}_without_subsampling.176x144.bmp)
+    [![](../outputs/task_2/foreman_qcif_0_c{d}_with_subsampling.88x72.bmp)](../outputs/task_2/foreman_qcif_0_c{d}_with_subsampling.88x72.bmp)
+    [![](../outputs/task_2/foreman_qcif_0_c{d}_with_upsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_c{d}_with_upsampling.176x144.bmp)
+'''
+    for d in ("b", "r"))
+}\
+"""
+)

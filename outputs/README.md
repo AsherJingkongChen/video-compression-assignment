@@ -1,8 +1,8 @@
-# Assignment 1 code outputs
+# Assignment 1 Code Outputs
 
 ## Task 1
 
-Convert an image from RGB to YCbCr 4:2:0 and recover it.
+Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
 Below are the metrics to compare
 the copied and transformed images in the RGB color space:
@@ -16,9 +16,42 @@ the copied and transformed images in the RGB color space:
  ['SSIM', '0.99853', '1.00000']]
 ```
 
+## Task 2
+
+Convert the multiple images from RGB to YCbCr `4:2:0` color space
+and pack them into a planar format.
+
+
+### Comparison between the images with and without sub-sampling
+
+The sub-sampled images are re-mapped from YCbCr to grayscale color space
+for visualization purposes.
+
+- The original image:
+
+    [![](../assets/foreman_qcif_0_rgb.bmp)](../assets/foreman_qcif_0_rgb.bmp)
+
+- The images at Y plane in the order of **without sub-sampling, with sub-sampling and with up-sampling**:
+
+    [![](../outputs/task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)
+    [![](../outputs/task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)
+    [![](../outputs/task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)
+
+- The images at Cb plane in the order of **without sub-sampling, with sub-sampling and with up-sampling**:
+
+    [![](../outputs/task_2/foreman_qcif_0_cb_without_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_cb_without_subsampling.176x144.bmp)
+    [![](../outputs/task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)](../outputs/task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)
+    [![](../outputs/task_2/foreman_qcif_0_cb_with_upsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_cb_with_upsampling.176x144.bmp)
+
+- The images at Cr plane in the order of **without sub-sampling, with sub-sampling and with up-sampling**:
+
+    [![](../outputs/task_2/foreman_qcif_0_cr_without_subsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_cr_without_subsampling.176x144.bmp)
+    [![](../outputs/task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)](../outputs/task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)
+    [![](../outputs/task_2/foreman_qcif_0_cr_with_upsampling.176x144.bmp)](../outputs/task_2/foreman_qcif_0_cr_with_upsampling.176x144.bmp)
+
 ## Task 3
 
-Quantize and encode YCbCr 4:2:0 images and recover them.
+Quantize and encode YCbCr `4:2:0` images and recover them.
 
 Taking quantization levels as symbols, here are the Huffman tree and code table used:
 
@@ -91,3 +124,4 @@ graph TD
     21114:8
 
 ```
+

@@ -207,12 +207,13 @@ for image_data_as_ycbcr_quantized, image_data_as_ycbcr_decoded in zip(
         )
 
 print(
-    f"""
+    f"""\
 ## Task 3
 
-Quantize and encode YCbCr 4:2:0 images and recover them.
+Quantize and encode YCbCr `4:2:0` images and recover them.
 
 Taking quantization levels as symbols, here are the Huffman tree and code table used:
 
-{coding_tree}"""
+{coding_tree}
+"""
 )

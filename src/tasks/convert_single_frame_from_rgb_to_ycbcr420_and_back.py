@@ -209,11 +209,11 @@ ssim_best = 1.0
 # Show the metrics
 print(
     """\
-# Assignment 1 code outputs
+# Assignment 1 Code Outputs
 
 ## Task 1
 
-Convert an image from RGB to YCbCr 4:2:0 and recover it.
+Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
 Below are the metrics to compare
 the copied and transformed images in the RGB color space:
@@ -230,4 +230,6 @@ pprint(
         ["SSIM", f"{ssim:.5f}", f"{ssim_best:.5f}"],
     ]
 )
-print("```")
+print("""\
+```
+""")
