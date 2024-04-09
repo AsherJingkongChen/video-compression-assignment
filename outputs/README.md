@@ -4,8 +4,12 @@
 
 Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
+*Assume that the copied image is equivalent to the original image.*
+
+### Comparison between the copied and transformed RGB images
+
 Below are the comparison metrics,
-they are computed from the copied and transformed images in the RGB color space:
+they are computed between the copied and transformed images in the RGB color space:
 
 ```python
 [['<Metrics>', '<Score>', '<Goal>'],
@@ -16,7 +20,7 @@ they are computed from the copied and transformed images in the RGB color space:
  ['SSIM', '0.99853', '1.00000']]
 ```
 
-The copied image *(from the original)* in the RGB color space:
+The copied image in the RGB color space:
 
 [![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)
 
@@ -111,6 +115,45 @@ from `2` in the grayscale colorspace:
 | On Cr plane | [![](./task_2/foreman_qcif_2_cr_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_2_cr_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_2_cr_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_2_cr_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_2_cr_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_2_cr_with_upsampling.176x144.bmp) |
 
 
+Take the images with sequence number `3` to further comparison.
+
+Below are the comparison metrics,
+they are computed between the image without sub-sampling
+and the other one with sub-sampling and up-sampling in the YCbCr color space:
+
+The image pair on Y plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '0.00000', '0.00000'],
+ ['MSE', '0.00000', '0.00000'],
+ ['NRMSE', '0.00000', '0.00000'],
+ ['PSNR', 'inf', 'inf'],
+ ['SSIM', '1.00000', '1.00000']]
+```
+
+The image pair on Cb plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '0.01417', '0.00000'],
+ ['MSE', '0.04257', '0.00000'],
+ ['NRMSE', '0.00173', '0.00000'],
+ ['PSNR', '61.83934', 'inf'],
+ ['SSIM', '0.99984', '1.00000']]
+```
+
+The image pair on Cr plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '0.02095', '0.00000'],
+ ['MSE', '0.21784', '0.00000'],
+ ['NRMSE', '0.00346', '0.00000'],
+ ['PSNR', '54.74938', 'inf'],
+ ['SSIM', '0.99982', '1.00000']]
+```
+
 ### Details
 
 The workflow is as follows:
@@ -123,6 +166,7 @@ graph LR
     ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
     dyuv[/Digital YCbCr Image 16~235; 16~240/]
     sub[Sub-sampling 4:2:0]
+    ups[Up-sampling from 4:2:0 to 4:4:4]
     pack[Pack YCbCr frames in YUV420p format]
 
     drgb -->|1| argb
@@ -131,6 +175,8 @@ graph LR
     ayuv -->|4| dyuv
     dyuv -->|5| sub
     sub -->|6| pack
+    sub -->|7| ups
+    ups -->|8| dyuv
 ```
 
 ## Task 3

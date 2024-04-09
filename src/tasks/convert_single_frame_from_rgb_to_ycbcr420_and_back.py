@@ -215,8 +215,12 @@ print(
 
 Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
+*Assume that the copied image is equivalent to the original image.*
+
+### Comparison between the copied and transformed RGB images
+
 Below are the comparison metrics,
-they are computed from the copied and transformed images in the RGB color space:
+they are computed between the copied and transformed images in the RGB color space:
 
 ```python
 {pformat(
@@ -231,7 +235,7 @@ they are computed from the copied and transformed images in the RGB color space:
 )}
 ```
 
-The copied image *(from the original)* in the RGB color space:
+The copied image in the RGB color space:
 
 [![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)
 

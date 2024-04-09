@@ -1,5 +1,5 @@
 from PIL import Image
-from numpy import array, uint8
+from numpy import array, array_equal, uint8
 from numpy.typing import NDArray
 from typing import List, Tuple
 
@@ -180,8 +180,51 @@ with open(
 ###  Analysis  ###
 ##################
 
-# Images with and without sub-sampling have different sizes,
-# so the comparison is only available on visual inspection.
+
+def get_metrics_report(image_a: Image.Image, image_b: Image.Image) -> str:
+    from pprint import pformat
+    from numpy import Inf, int16
+    from skimage.metrics import (
+        mean_squared_error as get_mse,
+        normalized_root_mse as get_nrmse,
+        peak_signal_noise_ratio as get_psnr,
+        structural_similarity as get_ssim,
+    )
+
+    image_copied_data = array(image_a, dtype=uint8)
+    image_transformed_data = array(image_b, dtype=uint8)
+
+    mae = abs(
+        image_copied_data.astype(int16) - image_transformed_data.astype(int16)
+    ).mean()
+    mse = get_mse(image_copied_data, image_transformed_data)
+    nrmse = get_nrmse(image_copied_data, image_transformed_data)
+    if array_equal(image_copied_data, image_transformed_data):
+        psnr = Inf
+    else:
+        psnr = get_psnr(image_copied_data, image_transformed_data)
+    ssim = get_ssim(image_copied_data, image_transformed_data, channel_axis=-1)
+
+    mae_best = 0.0
+    mse_best = 0.0
+    nrmse_best = 0.0
+    psnr_best = Inf
+    ssim_best = 1.0
+
+    return f"""\
+```python
+{pformat(
+    [
+        ["<Metrics>", "<Score>", "<Goal>"],
+        ["MAE", f"{mae:.5f}", f"{mae_best:.5f}"],
+        ["MSE", f"{mse:.5f}", f"{mse_best:.5f}"],
+        ["NRMSE", f"{nrmse:.5f}", f"{nrmse_best:.5f}"],
+        ["PSNR", f"{psnr:.5f}", f"{psnr_best:.5f}"],
+        ["SSIM", f"{ssim:.5f}", f"{ssim_best:.5f}"],
+    ]
+)}
+```"""
+
 
 print(
     """\
@@ -199,7 +242,8 @@ The up-sampled images are for comparison purposes.
 """
 )
 print(
-    "".join(f"""\
+    "".join(
+        f"""\
 The original image `{id}` in the RGB color space:
 
 [![](../assets/foreman_qcif_{id}_rgb.bmp)](../assets/foreman_qcif_{id}_rgb.bmp)
@@ -213,7 +257,30 @@ from `{id}` in the grayscale colorspace:
 | On Cb plane | [![](./task_2/foreman_qcif_{id}_cb_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cb_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_{id}_cb_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_{id}_cb_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_{id}_cb_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | [![](./task_2/foreman_qcif_{id}_cr_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cr_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_{id}_cr_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_{id}_cr_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_{id}_cr_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cr_with_upsampling.176x144.bmp) |
 
-""" for id in range(3))
+"""
+        for id in range(3)
+    )
+)
+print(
+    f"""\
+Take the images with sequence number `3` to further comparison.
+
+Below are the comparison metrics,
+they are computed between the image without sub-sampling
+and the other one with sub-sampling and up-sampling in the YCbCr color space:
+
+The image pair on Y plane:
+
+{get_metrics_report(image_y, image_y_upsampled)}
+
+The image pair on Cb plane:
+
+{get_metrics_report(image_cb, image_cb_upsampled)}
+
+The image pair on Cr plane:
+
+{get_metrics_report(image_cr, image_cr_upsampled)}
+"""
 )
 print(
     """\
@@ -229,6 +296,7 @@ graph LR
     ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
     dyuv[/Digital YCbCr Image 16~235; 16~240/]
     sub[Sub-sampling 4:2:0]
+    ups[Up-sampling from 4:2:0 to 4:4:4]
     pack[Pack YCbCr frames in YUV420p format]
 
     drgb -->|1| argb
@@ -237,6 +305,8 @@ graph LR
     ayuv -->|4| dyuv
     dyuv -->|5| sub
     sub -->|6| pack
+    sub -->|7| ups
+    ups -->|8| dyuv
 ```
 """
 )
