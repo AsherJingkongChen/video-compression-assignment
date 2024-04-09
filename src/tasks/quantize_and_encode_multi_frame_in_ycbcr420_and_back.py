@@ -12,6 +12,7 @@ from numpy import (
     savez,
 )
 from numpy.typing import NDArray
+from PIL import Image
 from typing import List, Tuple, TypeAlias
 
 from .utils.env import OUTPUTS_DIR_PATH
@@ -173,10 +174,30 @@ for image_data_as_ycbcr_decoded in images_data_as_ycbcr_decoded:
 ###  Save the artifacts  ###
 ############################
 
-# Huffman tree and codebook
 # dequantized frames
 # decoded frames
-# encoded bitstream
+
+for i, image_data_as_ycbcr_dequantized in enumerate(images_data_as_ycbcr_dequantized):
+    (
+        image_data_as_y_dequantized,
+        image_data_as_cb_dequantized,
+        image_data_as_cr_dequantized,
+    ) = image_data_as_ycbcr_dequantized
+
+    height, width = image_data_as_y_dequantized.shape
+    Image.fromarray(image_data_as_y_dequantized, mode="L").save(
+        OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_y_dequantized.{width}x{height}.bmp"
+    )
+
+    height, width = image_data_as_cb_dequantized.shape
+    Image.fromarray(image_data_as_cb_dequantized, mode="L").save(
+        OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cb_dequantized.{width}x{height}.bmp"
+    )
+
+    height, width = image_data_as_cr_dequantized.shape
+    Image.fromarray(image_data_as_cr_dequantized, mode="L").save(
+        OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cr_dequantized.{width}x{height}.bmp"
+    )
 
 ##################
 ###  Analysis  ###
@@ -215,5 +236,18 @@ Quantize and encode YCbCr `4:2:0` images and recover them.
 Taking quantization levels as symbols, here are the Huffman tree and code table used:
 
 {coding_tree}
+
+### Comparison between the images without and with quantization
+
+The quantized versions are visually different from the original RGB images.
+
+The transformed image `0` on different Y, Cb and Cr planes in the grayscale colorspace:
+
+|             | Before quantization | After quantization & de-quantization |
+| ----------- | ------------------- | ------------------------------------ |
+| On Y plane  | ![](./task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)  | ![](./task_3/foreman_qcif_0_y_dequantized.176x144.bmp) |
+| On Cb plane | ![](./task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)   | ![](./task_3/foreman_qcif_0_cb_dequantized.88x72.bmp)  |
+| On Cr plane | ![](./task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)   | ![](./task_3/foreman_qcif_0_cr_dequantized.88x72.bmp)  |
+
 """
 )

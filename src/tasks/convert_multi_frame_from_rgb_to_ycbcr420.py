@@ -246,20 +246,20 @@ print(
         f"""\
 The original image `{id}` in the RGB color space:
 
-[![](../assets/foreman_qcif_{id}_rgb.bmp)](../assets/foreman_qcif_{id}_rgb.bmp)
+![](../assets/foreman_qcif_{id}_rgb.bmp)
 
 The transformed image from `{id}` re-exported using `utils/YUVDisplay.exe`:
 
-[![](./task_2/foreman_qcif_{id}_ycbcr.yuv420p.176x144.yuv.bmp)](./task_2/foreman_qcif_{id}_ycbcr.yuv420p.176x144.yuv.bmp)
+![](./task_2/foreman_qcif_{id}_ycbcr.yuv420p.176x144.yuv.bmp)
 
 The transformed images on different Y, Cb and Cr planes
 from `{id}` in the grayscale colorspace:
 
 |             | Without sub-sampling | With sub-sampling | With up-sampling |
 | ----------- | -------------------- | ----------------- | ---------------- |
-| On Y plane  | [![](./task_2/foreman_qcif_{id}_y_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_y_without_subsampling.176x144.bmp)   | [![](./task_2/foreman_qcif_{id}_y_with_subsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_y_with_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_{id}_y_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_y_with_uppampling.176x144.bmp)   |
-| On Cb plane | [![](./task_2/foreman_qcif_{id}_cb_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cb_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_{id}_cb_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_{id}_cb_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_{id}_cb_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cb_with_upsampling.176x144.bmp) |
-| On Cr plane | [![](./task_2/foreman_qcif_{id}_cr_without_subsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cr_without_subsampling.176x144.bmp) | [![](./task_2/foreman_qcif_{id}_cr_with_subsampling.88x72.bmp)](./task_2/foreman_qcif_{id}_cr_with_subsampling.88x72.bmp)   | [![](./task_2/foreman_qcif_{id}_cr_with_upsampling.176x144.bmp)](./task_2/foreman_qcif_{id}_cr_with_upsampling.176x144.bmp) |
+| On Y plane  | ![](./task_2/foreman_qcif_{id}_y_without_subsampling.176x144.bmp)  | ![](./task_2/foreman_qcif_{id}_y_with_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_y_with_upsampling.176x144.bmp)  |
+| On Cb plane | ![](./task_2/foreman_qcif_{id}_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_{id}_cb_with_upsampling.176x144.bmp) |
+| On Cr plane | ![](./task_2/foreman_qcif_{id}_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_{id}_cr_with_upsampling.176x144.bmp) |
 
 """
         for id in range(3)
@@ -267,7 +267,7 @@ from `{id}` in the grayscale colorspace:
 )
 print(
     f"""\
-Take the images with sequence number `3` to further comparison.
+Take the images with sequence number `2` to further comparison.
 
 Below are the comparison metrics,
 they are computed between the image without sub-sampling

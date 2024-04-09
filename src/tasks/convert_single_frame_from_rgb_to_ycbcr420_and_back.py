@@ -237,23 +237,23 @@ they are computed between the copied and transformed images in the RGB color spa
 
 The copied image in the RGB color space:
 
-[![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)
+![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)
 
 The transformed image in the RGB color space:
 
-[![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)
+![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)
 
 The transformed image from re-exported using `utils/YUVDisplay.exe`:
 
-[![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)
+![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)
 
 The transformed image on different Y, Cb and Cr planes in the grayscale colorspace:
 
 |             | Before sub-sampling | After sub-sampling | After up-sampling |
 | ----------- | ------------------- | ------------------ | ----------------- |
-| On Y plane  | [![](./task_1/foreman_qcif_0_y_default.176x144.bmp)](./task_1/foreman_qcif_0_y_default.176x144.bmp)   | [![](./task_1/foreman_qcif_0_y_subsampled.176x144.bmp)](./task_1/foreman_qcif_0_y_subsampled.176x144.bmp) | [![](./task_1/foreman_qcif_0_y_upsampled.176x144.bmp)](./task_1/foreman_qcif_0_y_upsampled.176x144.bmp)   |
-| On Cb plane | [![](./task_1/foreman_qcif_0_cb_default.176x144.bmp)](./task_1/foreman_qcif_0_cb_default.176x144.bmp) | [![](./task_1/foreman_qcif_0_cb_subsampled.88x72.bmp)](./task_1/foreman_qcif_0_cb_subsampled.88x72.bmp)   | [![](./task_1/foreman_qcif_0_cb_upsampled.176x144.bmp)](./task_1/foreman_qcif_0_cb_upsampled.176x144.bmp) |
-| On Cr plane | [![](./task_1/foreman_qcif_0_cr_default.176x144.bmp)](./task_1/foreman_qcif_0_cr_default.176x144.bmp) | [![](./task_1/foreman_qcif_0_cr_subsampled.88x72.bmp)](./task_1/foreman_qcif_0_cr_subsampled.88x72.bmp)   | [![](./task_1/foreman_qcif_0_cr_upsampled.176x144.bmp)](./task_1/foreman_qcif_0_cr_upsampled.176x144.bmp) |
+| On Y plane  | ![](./task_1/foreman_qcif_0_y_default.176x144.bmp)  | ![](./task_1/foreman_qcif_0_y_subsampled.176x144.bmp) | ![](./task_1/foreman_qcif_0_y_upsampled.176x144.bmp)  |
+| On Cb plane | ![](./task_1/foreman_qcif_0_cb_default.176x144.bmp) | ![](./task_1/foreman_qcif_0_cb_subsampled.88x72.bmp)  | ![](./task_1/foreman_qcif_0_cb_upsampled.176x144.bmp) |
+| On Cr plane | ![](./task_1/foreman_qcif_0_cr_default.176x144.bmp) | ![](./task_1/foreman_qcif_0_cr_subsampled.88x72.bmp)  | ![](./task_1/foreman_qcif_0_cr_upsampled.176x144.bmp) |
 """
 )
 print(
