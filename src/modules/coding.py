@@ -1,6 +1,5 @@
-from bitstring import Bits
 from dataclasses import dataclass
-from functools import lru_cache
+from functools import cached_property
 from typing import AnyStr, Dict, Iterable, Union, Tuple, TypeVar, Generic
 
 _T = TypeVar("_T")
@@ -46,7 +45,7 @@ class HuffmanTree(Generic[_T]):
             heappush(values, (heappop(values)) + heappop(values))
         return values[0]
 
-    def decode(self, code: Bits) -> Tuple[_T, Bits]:
+    def decode(self, code: str) -> Tuple[_T, str]:
         """
         Decode a Huffman code into a symbol
 
@@ -64,7 +63,7 @@ class HuffmanTree(Generic[_T]):
         except ValueError:
             raise ValueError(f"Unrecognized code: {code}")
 
-    def encode(self, symbol: _T) -> Bits:
+    def encode(self, symbol: _T) -> str:
         """
         Encode a symbol into a Huffman code
 
@@ -72,14 +71,14 @@ class HuffmanTree(Generic[_T]):
         - `symbol`: The symbol to encode
 
         ## Returns
-        - The Huffman code of the symbol as `Bits`
+        - The Huffman code of the symbol as `str`
         """
 
-        return self._get_codetable()[symbol]
+        return self._get_codetable[symbol]
 
     def equal(self, other: "HuffmanTree[_T]") -> bool:
         """
-        Fully compare two Huffman trees
+        Compare the structure and properties between two Huffman trees
         """
 
         result = self.frequency == other.frequency and self.symbol == other.symbol
@@ -95,7 +94,7 @@ class HuffmanTree(Generic[_T]):
             result = result and True
         return result
 
-    def _decode(self, prefix: Bits) -> Tuple[_T, Bits]:
+    def _decode(self, prefix: str) -> Tuple[_T, str]:
         """
         An internal method of `HuffmanTree.decode`
         """
@@ -105,23 +104,22 @@ class HuffmanTree(Generic[_T]):
         if not prefix:
             raise ValueError()
 
-        if prefix[0]:
-            if self.right:
-                return self.right._decode(prefix[1:])
-        elif self.left:
+        if prefix[0] == "0" and self.left:
             return self.left._decode(prefix[1:])
-        else:
-            raise ValueError()
+        if prefix[0] == "1" and self.right:
+            return self.right._decode(prefix[1:])
 
-    # @lru_cache(maxsize=1)
-    def _get_codetable(self) -> Dict[_T, Bits]:
+        raise ValueError()
+
+    @cached_property
+    def _get_codetable(self) -> Dict[_T, str]:
         """
         An internal method of `HuffmanTree.encode`
         """
 
-        return dict(self._get_codetable_2(Bits()))
+        return dict(self._get_codetable_2(""))
 
-    def _get_codetable_2(self, prefix: Bits) -> Iterable[Tuple[_T, Bits]]:
+    def _get_codetable_2(self, prefix: str) -> Iterable[Tuple[_T, str]]:
         """
         An internal method of `HuffmanTree._get_codetable`
         """
@@ -129,9 +127,9 @@ class HuffmanTree(Generic[_T]):
         if not self.left and not self.right:
             yield (self.symbol, prefix)
         if self.left:
-            yield from self.left._get_codetable_2(prefix + Bits(bin="0"))
+            yield from self.left._get_codetable_2(prefix + "0")
         if self.right:
-            yield from self.right._get_codetable_2(prefix + Bits(bin="1"))
+            yield from self.right._get_codetable_2(prefix + "1")
 
     def _repr(self) -> str:
         """
@@ -206,7 +204,7 @@ class HuffmanTree(Generic[_T]):
 
         return f"""\
 ```python
-{pformat(self._get_codetable())}
+{pformat(self._get_codetable)}
 ```
 
 ```mermaid
