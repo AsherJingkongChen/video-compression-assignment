@@ -1,8 +1,8 @@
-from bitstring import Bits
+from bitstring import Bits, ConstBitStream
 from collections import Counter
 from itertools import chain
 from pprint import pprint
-from numpy import array, fromiter, load, ravel, uint8, savez
+from numpy import asarray, load, ravel, uint8, uint32, uint64, savez
 from numpy.typing import NDArray
 from typing import List, Tuple, TypeAlias
 
@@ -30,7 +30,7 @@ QUANTIZATION_RANGES = [(16, 240), (0, QUANTIZATION_LEVELS - 1)]
 # Quantize the YCbCr images to 16 levels evenly
 images_data_as_ycbcr_quantized: ImagesData = []
 for image_data_as_ycbcr in images_data_as_ycbcr:
-    image_data_as_ycbcr_quantized = ()
+    image_data_as_ycbcr_quantized: Tuple[NDArray, ...] = ()
     for image_data_as_plane in image_data_as_ycbcr:
         image_data_as_plane_quantized = quantize_evenly(
             image_data_as_plane,
@@ -41,43 +41,102 @@ for image_data_as_ycbcr in images_data_as_ycbcr:
     images_data_as_ycbcr_quantized.append(image_data_as_ycbcr_quantized)
 
 # Build a Huffman tree and codebook for the quantized YCbCr images
-frequencies_and_quantization_levels = [
-    (frequency, level)
-    for level, frequency in Counter(
-        chain(*map(ravel, chain(*images_data_as_ycbcr_quantized)))
-    ).items()
-]
+frequencies_and_quantization_levels = asarray(
+    [
+        (frequency, level)
+        for level, frequency in Counter(
+            chain(*map(ravel, chain(*images_data_as_ycbcr_quantized)))
+        ).items()
+    ]
+)
 coding_tree = HuffmanTree.from_symbolic_frequencies(frequencies_and_quantization_levels)
-quantization_levels_and_codes = list(coding_tree.codebook)
-quantization_level_to_code_table = dict(quantization_levels_and_codes)
+quantization_level_to_code_table = dict(coding_tree.codebook)
 
 # Encode the quantized YCbCr images using Huffman coding scheme
-images_data_as_ycbcr_encoded: List[bytes] = []
+# - Gather metadata of the encoded images
+images_data_as_ycbcr_encoded: List[Tuple[Bits, Bits, Bits]] = []
+images_bitlen_as_ycbcr_encoded: List[Tuple[int, int, int]] = []
+images_shape_as_ycbcr_encoded: List[
+    Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[int, ...]]
+] = []
 for image_data_as_ycbcr_quantized in images_data_as_ycbcr_quantized:
-    image_data_as_ycbcr_encoded = ()
+    image_data_as_ycbcr_encoded: Tuple[Bits, ...] = ()
+    image_bitlen_as_ycbcr_encoded: Tuple[int, ...] = ()
+    image_shape_as_ycbcr_encoded: Tuple[Tuple[int, ...], ...] = ()
     for image_data_as_plane_quantized in image_data_as_ycbcr_quantized:
-        image_data_as_plane_encoded = "".join(
-            map(
-                dict(quantization_levels_and_codes).get,
-                image_data_as_plane_quantized.ravel(),
+        image_data_as_plane_encoded = Bits(
+            bin="".join(
+                map(
+                    quantization_level_to_code_table.get,
+                    image_data_as_plane_quantized.ravel(),
+                )
             )
         )
+        image_bitlen_as_plane_encoded = len(image_data_as_plane_encoded)
+        image_shape_as_plane_encoded = image_data_as_plane_quantized.shape
         image_data_as_ycbcr_encoded += (image_data_as_plane_encoded,)
-    images_data_as_ycbcr_encoded.append("".join(image_data_as_ycbcr_encoded))
-encoded_bits = Bits(bin="".join(images_data_as_ycbcr_encoded))
-pprint(encoded_bits[-512:])
+        image_bitlen_as_ycbcr_encoded += (image_bitlen_as_plane_encoded,)
+        image_shape_as_ycbcr_encoded += (image_shape_as_plane_encoded,)
+    images_data_as_ycbcr_encoded.append(image_data_as_ycbcr_encoded)
+    images_bitlen_as_ycbcr_encoded.append(image_bitlen_as_ycbcr_encoded)
+    images_shape_as_ycbcr_encoded.append(image_shape_as_ycbcr_encoded)
 
-# # Save the encoded YCbCr image with the huffman codebook into a bitstream
-# bitstream_encoded = (huffman_codebook, images_data_as_ycbcr_encoded)
+# Save the encoded YCbCr images with their metadata
+# and the huffman codebook into a bundle.
+images_data_as_ycbcr_encoded_chained = Bits().join(chain(*images_data_as_ycbcr_encoded))
 
-# # Extract the huffman tree and codebook from the bitstream to decode
-# bitstream_to_decode = bitstream_encoded
-# huffman_codebook_extracted = bitstream_to_decode[0]
-# huffman_tree_extracted = huffman_codebook_extracted
+bundle_path = OUTPUTS_DIR_PATH / "foreman_qcif_0-2_huffman-encoded.ycbcr.yuv420p.npz"
+savez(
+    bundle_path,
+    images_data_as_ycbcr_encoded_chained=asarray(
+        images_data_as_ycbcr_encoded_chained.tobytes()
+    ),
+    images_bitlen_as_ycbcr_encoded=asarray(
+        images_bitlen_as_ycbcr_encoded, dtype=uint64
+    ),
+    images_shape_as_ycbcr_encoded=asarray(images_shape_as_ycbcr_encoded, dtype=uint32),
+    coding_tree_source=frequencies_and_quantization_levels,
+)
+
+print(len(images_data_as_ycbcr_encoded_chained))
+
+# Load the bundle and extract the encoded bits, metadata and huffman codebook
+bundle = load(bundle_path, mmap_mode="r")
+coding_tree_re = HuffmanTree.from_symbolic_frequencies(bundle["coding_tree_source"])
+code_to_quantization_level_table_re = {
+    Bits(bin=code): symbol for symbol, code in coding_tree_re.codebook
+}
+
+images_data_as_ycbcr_encoded_chained_re = ConstBitStream(
+    bundle["images_data_as_ycbcr_encoded_chained"].tobytes()
+)
+for image_bitlen_as_ycbcr_encoded_re, image_shape_as_ycbcr_encoded_re in zip(
+    bundle["images_bitlen_as_ycbcr_encoded"].ravel(),
+    bundle["images_shape_as_ycbcr_encoded"].reshape(-1, 2),
+):
+    images_data_as_ycbcr_encoded_re = images_data_as_ycbcr_encoded_chained_re.read(
+        image_bitlen_as_ycbcr_encoded_re.item()
+    )
+    encoded_bits = images_data_as_ycbcr_encoded_re
+    print(len(encoded_bits))
+    # while images_data_as_ycbcr_encoded_re:
+    #     for code, quantization_level in code_to_quantization_level_table_re.items():
+    #         if images_data_as_ycbcr_encoded_re.startswith(code):
+    #             res += quantization_level
+    #             images_data_as_ycbcr_encoded_re = images_data_as_ycbcr_encoded_re[len(code):]
+
+# images_data_as_encoded_bits_re = Bits(bundle["images_data_as_encoded_bits"].tobytes())[
+#     : bundle["length_of_images_data_as_encoded_bits"].item()
+# ]
+# coding_tree_re = HuffmanTree.from_symbolic_frequencies(bundle["coding_tree_source"])
+# quantization_level_to_code_table_re = dict(coding_tree_re.codebook)
+
+# assert images_data_as_encoded_bits == images_data_as_encoded_bits_re
+# assert quantization_level_to_code_table == quantization_level_to_code_table_re
 
 # # Decode the encoded YCbCr image using Huffman coding scheme
 # images_data_as_ycbcr_decoded = []
-# for image_data_as_ycbcr_to_decode in bitstream_to_decode[0]:
+# for image_data_as_ycbcr_to_decode in Constbitstream_to_decode[0]:
 #     image_data_as_ycbcr_decoded = (
 #         huffman_tree_extracted,
 #         image_data_as_ycbcr_to_decode,
@@ -95,7 +154,7 @@ pprint(encoded_bits[-512:])
 #             image_data_as_cr_decoded,
 #         )
 #     )
-images_data_as_ycbcr_decoded = images_data_as_ycbcr_quantized # [TODO]
+images_data_as_ycbcr_decoded = images_data_as_ycbcr_quantized  # [TODO]
 
 # De-quantize the decoded YCbCr images in 16 levels evenly
 images_data_as_ycbcr_dequantized: ImagesData = []
@@ -117,7 +176,7 @@ for image_data_as_ycbcr_decoded in images_data_as_ycbcr_decoded:
 # Huffman tree and codebook
 # dequantized frames
 # decoded frames
-# encoded bitstream
+# encoded Constbitstream
 
 ##################
 ###  Analysis  ###
@@ -127,7 +186,7 @@ print(
     """
 [Task 3]
     Quantize and encode YCbCr 4:2:0 images and recover them back.
-    Below is the mapping table from quantization level to code:
+    Below is the Huffman codebook from quantization level to code:
 """
 )
 pprint(quantization_level_to_code_table)
