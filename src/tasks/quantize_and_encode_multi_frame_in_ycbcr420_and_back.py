@@ -84,7 +84,7 @@ for image_data_as_ycbcr_quantized in images_data_as_ycbcr_quantized:
 # Save the encoded YCbCr images with their metadata and the huffman codebook into a bundle
 images_data_as_ycbcr_encoded_chained = Bits().join(chain(*images_data_as_ycbcr_encoded))
 
-bundle_path = OUTPUTS_DIR_PATH / "foreman_qcif_0-2_huffman-encoded.ycbcr.yuv420p.npz"
+bundle_path = OUTPUTS_DIR_PATH / "foreman_qcif_0-2_ycbcr.yuv420p.yuv.huffman.npz"
 savez(
     bundle_path,
     images_data_as_ycbcr_encoded_chained=asarray(
@@ -158,7 +158,7 @@ for image_data_as_ycbcr_decoded in images_data_as_ycbcr_decoded:
 # Huffman tree and codebook
 # dequantized frames
 # decoded frames
-# encoded Constbitstream
+# encoded bitstream
 
 ##################
 ###  Analysis  ###
@@ -197,7 +197,7 @@ pprint(quantization_level_to_code_table)
 print("```")
 print(
     f"""
-    Below is the Huffman coding tree in Mermaid diagram syntax:
+Below is the Huffman coding tree in Mermaid diagram syntax:
 
 ```mermaid
 {coding_tree}

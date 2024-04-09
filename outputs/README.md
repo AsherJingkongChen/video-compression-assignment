@@ -41,7 +41,7 @@ Below is the Huffman codebook from quantization level to code:
  15: '0011'}
 ```
 
-    Below is the Huffman coding tree in Mermaid diagram syntax:
+Below is the Huffman coding tree in Mermaid diagram syntax:
 
 ```mermaid
 graph TD
