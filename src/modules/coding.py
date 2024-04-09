@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterable, Union, Tuple, TypeVar, Generic
+from typing import Dict, Iterable, Union, Tuple, TypeVar, Generic
 
 _T = TypeVar("_T")
 
@@ -44,33 +44,34 @@ class HuffmanTree(Generic[_T]):
             heappush(values, (heappop(values)) + heappop(values))
         return values[0]
 
-    @property
-    def codebook(self) -> Iterable[Tuple[_T, str]]:
-        """
-        Get the codebook of the Huffman tree
+    def decode(self, code: str) -> _T:
+        pass
 
-        ## Returns
-        - An iterable of tuples of symbols
-          and their Huffman codes represented as `str`
+    def encode(self, symbol: _T) -> str:
+        pass
+
+    def _get_codetable(self) -> Dict[_T, str]:
+        """
+        An internal method of `HuffmanTree.encode`
         """
 
-        return self._get_codebook("")
+        return dict(self._get_codetable_2(""))
 
-    def _get_codebook(self, prefix: str) -> Iterable[Tuple[_T, str]]:
+    def _get_codetable_2(self, prefix: str) -> Iterable[Tuple[_T, str]]:
         """
-        Internal method of `HuffmanTree.codebook`
+        An internal method of `HuffmanTree._get_codetable`
         """
 
         if not self.left and not self.right:
             yield (self.symbol, prefix)
         if self.left:
-            yield from self.left._get_codebook(prefix + "0")
+            yield from self.left._get_codetable_2(prefix + "0")
         if self.right:
-            yield from self.right._get_codebook(prefix + "1")
+            yield from self.right._get_codetable_2(prefix + "1")
 
     def _repr(self) -> str:
         """
-        Internal method of `HuffmanTree.__repr__`
+        An internal method of `HuffmanTree.__repr__`
         """
         symbol_repr = f":{self.symbol}" if self.symbol else ""
         node_repr = f"{self.frequency}{symbol_repr}"
@@ -131,8 +132,20 @@ class HuffmanTree(Generic[_T]):
 
     def __repr__(self) -> str:
         """
-        Represents the Huffman tree in Mermaid diagram syntax
-        """
+        Represents information of the tree:
 
-        return f"""graph TD
-{self._repr()}"""
+        1. The Huffman code table in Python syntax
+        2. The Huffman tree in Mermaid diagram syntax
+        """
+        
+        from pprint import pformat
+
+        return f"""\
+```python
+{pformat(self._get_codetable())}
+```
+
+```mermaid
+graph TD
+{self._repr()}
+```"""

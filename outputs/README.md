@@ -20,7 +20,7 @@ the copied and transformed images in the RGB color space:
 
 Quantize and encode YCbCr 4:2:0 images and recover them.
 
-Below is the Huffman codebook from quantization level to code:
+Taking quantization levels as symbols, here are the Huffman tree and code table used:
 
 ```python
 {0: '10000001',
@@ -40,8 +40,6 @@ Below is the Huffman codebook from quantization level to code:
  14: '1101',
  15: '0011'}
 ```
-
-Below is the Huffman coding tree in Mermaid diagram syntax:
 
 ```mermaid
 graph TD
