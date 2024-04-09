@@ -1,5 +1,7 @@
+from bitstring import Bits
 from dataclasses import dataclass
-from typing import Dict, Iterable, Union, Tuple, TypeVar, Generic
+from functools import lru_cache
+from typing import AnyStr, Dict, Iterable, Union, Tuple, TypeVar, Generic
 
 _T = TypeVar("_T")
 
@@ -44,20 +46,82 @@ class HuffmanTree(Generic[_T]):
             heappush(values, (heappop(values)) + heappop(values))
         return values[0]
 
-    def decode(self, code: str) -> _T:
-        pass
+    def decode(self, code: Bits) -> Tuple[_T, Bits]:
+        """
+        Decode a Huffman code into a symbol
 
-    def encode(self, symbol: _T) -> str:
-        pass
+        ## Parameters
+        - `code`: The Huffman code to decode
+            - If the *prefix* does not match any code,
+              a `ValueError` will be raised.
 
-    def _get_codetable(self) -> Dict[_T, str]:
+        ## Returns
+        - A tuple of the symbol and the remaining code
+        """
+
+        try:
+            return self._decode(code)
+        except ValueError:
+            raise ValueError(f"Unrecognized code: {code}")
+
+    def encode(self, symbol: _T) -> Bits:
+        """
+        Encode a symbol into a Huffman code
+
+        ## Parameters
+        - `symbol`: The symbol to encode
+
+        ## Returns
+        - The Huffman code of the symbol as `Bits`
+        """
+
+        return self._get_codetable()[symbol]
+
+    def equal(self, other: "HuffmanTree[_T]") -> bool:
+        """
+        Fully compare two Huffman trees
+        """
+
+        result = self.frequency == other.frequency and self.symbol == other.symbol
+
+        if self.left and other.left:
+            result = result and self.left.equal(other.left)
+        elif not self.left and not other.left:
+            result = result and True
+
+        if self.right and other.right:
+            result = result and self.right.equal(other.right)
+        elif not self.right and not other.right:
+            result = result and True
+        return result
+
+    def _decode(self, prefix: Bits) -> Tuple[_T, Bits]:
+        """
+        An internal method of `HuffmanTree.decode`
+        """
+
+        if not self.left and not self.right:
+            return (self.symbol, prefix)
+        if not prefix:
+            raise ValueError()
+
+        if prefix[0]:
+            if self.right:
+                return self.right._decode(prefix[1:])
+        elif self.left:
+            return self.left._decode(prefix[1:])
+        else:
+            raise ValueError()
+
+    # @lru_cache(maxsize=1)
+    def _get_codetable(self) -> Dict[_T, Bits]:
         """
         An internal method of `HuffmanTree.encode`
         """
 
-        return dict(self._get_codetable_2(""))
+        return dict(self._get_codetable_2(Bits()))
 
-    def _get_codetable_2(self, prefix: str) -> Iterable[Tuple[_T, str]]:
+    def _get_codetable_2(self, prefix: Bits) -> Iterable[Tuple[_T, Bits]]:
         """
         An internal method of `HuffmanTree._get_codetable`
         """
@@ -65,9 +129,9 @@ class HuffmanTree(Generic[_T]):
         if not self.left and not self.right:
             yield (self.symbol, prefix)
         if self.left:
-            yield from self.left._get_codetable_2(prefix + "0")
+            yield from self.left._get_codetable_2(prefix + Bits(bin="0"))
         if self.right:
-            yield from self.right._get_codetable_2(prefix + "1")
+            yield from self.right._get_codetable_2(prefix + Bits(bin="1"))
 
     def _repr(self) -> str:
         """
@@ -137,7 +201,7 @@ class HuffmanTree(Generic[_T]):
         1. The Huffman code table in Python syntax
         2. The Huffman tree in Mermaid diagram syntax
         """
-        
+
         from pprint import pformat
 
         return f"""\
