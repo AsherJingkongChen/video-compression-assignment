@@ -28,6 +28,10 @@ The transformed image in the RGB color space:
 
 [![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)
 
+The transformed image from re-exported using `utils/YUVDisplay.exe`:
+
+[![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)
+
 The transformed image on different Y, Cb and Cr planes in the grayscale colorspace:
 
 |             | Before sub-sampling | After sub-sampling | After up-sampling |
@@ -79,6 +83,10 @@ The original image `0` in the RGB color space:
 
 [![](../assets/foreman_qcif_0_rgb.bmp)](../assets/foreman_qcif_0_rgb.bmp)
 
+The transformed image from `0` re-exported using `utils/YUVDisplay.exe`:
+
+[![](./task_2/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)](./task_2/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)
+
 The transformed images on different Y, Cb and Cr planes
 from `0` in the grayscale colorspace:
 
@@ -92,6 +100,10 @@ The original image `1` in the RGB color space:
 
 [![](../assets/foreman_qcif_1_rgb.bmp)](../assets/foreman_qcif_1_rgb.bmp)
 
+The transformed image from `1` re-exported using `utils/YUVDisplay.exe`:
+
+[![](./task_2/foreman_qcif_1_ycbcr.yuv420p.176x144.yuv.bmp)](./task_2/foreman_qcif_1_ycbcr.yuv420p.176x144.yuv.bmp)
+
 The transformed images on different Y, Cb and Cr planes
 from `1` in the grayscale colorspace:
 
@@ -104,6 +116,10 @@ from `1` in the grayscale colorspace:
 The original image `2` in the RGB color space:
 
 [![](../assets/foreman_qcif_2_rgb.bmp)](../assets/foreman_qcif_2_rgb.bmp)
+
+The transformed image from `2` re-exported using `utils/YUVDisplay.exe`:
+
+[![](./task_2/foreman_qcif_2_ycbcr.yuv420p.176x144.yuv.bmp)](./task_2/foreman_qcif_2_ycbcr.yuv420p.176x144.yuv.bmp)
 
 The transformed images on different Y, Cb and Cr planes
 from `2` in the grayscale colorspace:

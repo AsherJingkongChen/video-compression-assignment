@@ -243,6 +243,10 @@ The transformed image in the RGB color space:
 
 [![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)
 
+The transformed image from re-exported using `utils/YUVDisplay.exe`:
+
+[![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)
+
 The transformed image on different Y, Cb and Cr planes in the grayscale colorspace:
 
 |             | Before sub-sampling | After sub-sampling | After up-sampling |

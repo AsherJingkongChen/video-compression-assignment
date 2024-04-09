@@ -248,6 +248,10 @@ The original image `{id}` in the RGB color space:
 
 [![](../assets/foreman_qcif_{id}_rgb.bmp)](../assets/foreman_qcif_{id}_rgb.bmp)
 
+The transformed image from `{id}` re-exported using `utils/YUVDisplay.exe`:
+
+[![](./task_2/foreman_qcif_{id}_ycbcr.yuv420p.176x144.yuv.bmp)](./task_2/foreman_qcif_{id}_ycbcr.yuv420p.176x144.yuv.bmp)
+
 The transformed images on different Y, Cb and Cr planes
 from `{id}` in the grayscale colorspace:
 
