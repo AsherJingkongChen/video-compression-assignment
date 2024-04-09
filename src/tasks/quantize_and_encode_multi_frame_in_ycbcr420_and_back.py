@@ -8,7 +8,6 @@ from numpy import (
     load,
     ravel,
     uint8,
-    uint32,
     uint64,
     savez,
 )
@@ -107,7 +106,7 @@ savez(
     ),
     images_shape_as_ycbcr_encoded=asarray(
         images_shape_as_ycbcr_encoded,
-        dtype=uint32,
+        dtype=uint64,
     ),
     coding_tree_source=frequencies_and_quantization_levels,
 )
