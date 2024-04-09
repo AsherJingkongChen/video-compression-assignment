@@ -4,6 +4,10 @@
 
 See the [`assignment.pdf`](./assignment.pdf) for more information.
 
+## Outputs
+
+See the [`outputs/`](./outputs/) directory for the outputs.
+
 ## Run
 
 1. Install the requirements

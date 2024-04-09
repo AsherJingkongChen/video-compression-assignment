@@ -1,6 +1,7 @@
 from numpy.typing import ArrayLike, NDArray
 from typing import Tuple
 
+
 def quantize_evenly(
     values: ArrayLike,
     levels: int,

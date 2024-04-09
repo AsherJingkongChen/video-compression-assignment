@@ -68,6 +68,35 @@ class HuffmanTree(Generic[_T]):
         if self.right:
             yield from self.right._get_codebook(prefix + "1")
 
+    def _repr(self) -> str:
+        """
+        Internal method of `HuffmanTree.__repr__`
+        """
+        symbol_repr = f":{self.symbol}" if self.symbol else ""
+        node_repr = f"{self.frequency}{symbol_repr}"
+        left_repr = f"{self.left._repr()}" if self.left else ""
+        right_repr = f"{self.right._repr()}" if self.right else ""
+        left_symbol_repr = (
+            f":{self.left.symbol}" if self.left and self.left.symbol else ""
+        )
+        right_symbol_repr = (
+            f":{self.right.symbol}" if self.right and self.right.symbol else ""
+        )
+        left_node_repr = (
+            f" --> {self.left.frequency}{left_symbol_repr}" if self.left else ""
+        )
+        right_node_repr = (
+            f" --> {self.right.frequency}{right_symbol_repr}" if self.right else ""
+        )
+        if not self.left and not self.right:
+            return f"""\
+    {node_repr}
+"""
+        return f"""\
+    {node_repr}{left_node_repr}
+    {node_repr}{right_node_repr}
+{left_repr}{right_repr}"""
+
     def __eq__(self, other: "HuffmanTree[_T]") -> bool:
         "Compare the frequencies of two Huffman trees"
         return self.frequency == other.frequency
@@ -104,23 +133,6 @@ class HuffmanTree(Generic[_T]):
         """
         Represents the Huffman tree in Mermaid diagram syntax
         """
-        symbol_repr = f":{self.symbol}" if self.symbol else ""
-        node_repr = f"{self.frequency}{symbol_repr}"
-        left_repr = f"{self.left}" if self.left else ""
-        left_symbol_repr = (
-            f":{self.left.symbol}" if self.left and self.left.symbol else ""
-        )
-        left_node_repr = (
-            f" --> {self.left.frequency}{left_symbol_repr}" if self.left else ""
-        )
-        right_repr = f"{self.right}" if self.right else ""
-        right_symbol_repr = (
-            f":{self.right.symbol}" if self.right and self.right.symbol else ""
-        )
-        right_node_repr = (
-            f" --> {self.right.frequency}{right_symbol_repr}" if self.right else ""
-        )
-        return f"""\
-    {node_repr}{left_node_repr}
-    {node_repr}{right_node_repr}
-{left_repr}{right_repr}"""
+
+        return f"""graph TD
+{self._repr()}"""

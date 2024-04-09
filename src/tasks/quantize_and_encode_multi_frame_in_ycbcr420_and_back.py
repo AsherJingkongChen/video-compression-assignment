@@ -185,20 +185,21 @@ for image_data_as_ycbcr_quantized, image_data_as_ycbcr_decoded in zip(
 
 print(
     """
-[Task 3]
-    Quantize and encode YCbCr 4:2:0 images and recover them back.
-    Below is the Huffman codebook from quantization level to code:
-"""
+## Task 3
+
+Quantize and encode YCbCr 4:2:0 images and recover them.
+
+Below is the Huffman codebook from quantization level to code:
+
+```python"""
 )
 pprint(quantization_level_to_code_table)
+print("```")
 print(
-    """
+    f"""
     Below is the Huffman coding tree in Mermaid diagram syntax:
 
 ```mermaid
-
-Graph TD\
-"""
+{coding_tree}
+```"""
 )
-pprint(coding_tree)
-print("```")

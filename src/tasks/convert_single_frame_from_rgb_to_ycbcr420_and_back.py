@@ -208,15 +208,21 @@ ssim_best = 1.0
 
 # Show the metrics
 print(
-    """
-[Task 1]
-    Convert an image from RGB to YCbCr420 and back.
-    Below are the metrics to compare the copied and transformed images:
-"""
+    """\
+# Assignment 1 code outputs
+
+## Task 1
+
+Convert an image from RGB to YCbCr 4:2:0 and recover it.
+
+Below are the metrics to compare
+the copied and transformed images in the RGB color space:
+
+```python"""
 )
 pprint(
     [
-        ["<Metrics>", "<Score>", "<Maximum>"],
+        ["<Metrics>", "<Score>", "<Goal>"],
         ["MAE", f"{mae:.5f}", f"{mae_best:.5f}"],
         ["MSE", f"{mse:.5f}", f"{mse_best:.5f}"],
         ["NRMSE", f"{nrmse:.5f}", f"{nrmse_best:.5f}"],
@@ -224,3 +230,4 @@ pprint(
         ["SSIM", f"{ssim:.5f}", f"{ssim_best:.5f}"],
     ]
 )
+print("```")
