@@ -51,7 +51,7 @@ for image_data_as_ycbcr in images_data_as_ycbcr:
 
     images_data_as_ycbcr_quantized.append(image_data_as_ycbcr_quantized)
 
-# Build a Huffman tree and codebook for the quantized YCbCr images
+# Build a Huffman tree and code table for the quantized YCbCr images
 frequencies_and_quantization_levels = asarray(
     [
         (frequency, level)
@@ -90,7 +90,7 @@ for image_data_as_ycbcr_quantized in images_data_as_ycbcr_quantized:
     images_bitlen_as_ycbcr_encoded.append(image_bitlen_as_ycbcr_encoded)
     images_shape_as_ycbcr_encoded.append(image_shape_as_ycbcr_encoded)
 
-# Save the encoded YCbCr images with their metadata and the huffman codebook into a bundle
+# Save the encoded YCbCr images with their metadata and the huffman code table into a bundle
 images_data_as_ycbcr_encoded_chained = Bits(
     bin="".join(chain(*images_data_as_ycbcr_encoded))
 )
@@ -112,7 +112,7 @@ savez(
     coding_tree_source=frequencies_and_quantization_levels,
 )
 
-# Load the bundle and recover the encoded images, metadata and huffman codebook
+# Load the bundle and recover the encoded images, metadata and huffman code table
 bundle = load(bundle_path, mmap_mode="r")
 coding_tree_re: HuffmanTree[uint8] = HuffmanTree.from_symbolic_frequencies(
     bundle["coding_tree_source"]
@@ -174,8 +174,28 @@ for image_data_as_ycbcr_decoded in images_data_as_ycbcr_decoded:
 ###  Save the artifacts  ###
 ############################
 
-# dequantized frames
-# decoded frames
+
+for i, image_data_as_ycbcr in enumerate(images_data_as_ycbcr):
+    (
+        image_data_as_y,
+        image_data_as_cb,
+        image_data_as_cr,
+    ) = image_data_as_ycbcr
+
+    height, width = image_data_as_y.shape
+    Image.fromarray(image_data_as_y, mode="L").save(
+        OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_y_before_quantized.{width}x{height}.bmp"
+    )
+
+    height, width = image_data_as_cb.shape
+    Image.fromarray(image_data_as_cb, mode="L").save(
+        OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cb_before_quantized.{width}x{height}.bmp"
+    )
+
+    height, width = image_data_as_cr.shape
+    Image.fromarray(image_data_as_cr, mode="L").save(
+        OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cr_before_quantized.{width}x{height}.bmp"
+    )
 
 for i, image_data_as_ycbcr_dequantized in enumerate(images_data_as_ycbcr_dequantized):
     (
@@ -199,9 +219,9 @@ for i, image_data_as_ycbcr_dequantized in enumerate(images_data_as_ycbcr_dequant
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cr_dequantized.{width}x{height}.bmp"
     )
 
-##################
-###  Analysis  ###
-##################
+################
+###  Report  ###
+################
 
 # Assert that the recovered huffman tree is equal to the original one
 assert coding_tree.equal(coding_tree_re)
@@ -231,23 +251,77 @@ print(
     f"""\
 ## Task 3
 
-Quantize and encode YCbCr `4:2:0` images and recover them.
+Quantize in 16 levels and encode YCbCr `4:2:0` images and recover them.
 
-Taking quantization levels as symbols, here are the Huffman tree and code table used:
+Uses Huffman coding scheme.
+
+### Visual Comparison
+
+Display structures and images.
+
+There are 16 symbols in Huffman code table as the number of quantization levels.
+
+There are the code table and tree diagram of the Huffman tree used below.
 
 {coding_tree}
 
-### Comparison between the images without and with quantization
+I added assertion checks to ensure that
+the decoded images are equal to the quantized images.
+(See the module `{__name__}`)
 
-The quantized versions are visually different from the original RGB images.
+I added the re-exported images using `utils/YUVDisplay.exe`
+for comparison purposes since they have the same size as the original ones.
+"""
+)
+print(
+    "".join(
+        f"""\
+The images with sequence number `{id}` are displayed below.
 
-The transformed image `0` on different Y, Cb and Cr planes in the grayscale colorspace:
+There are the images in the RGB color space below.
 
-|             | Before quantization | After quantization & de-quantization |
-| ----------- | ------------------- | ------------------------------------ |
-| On Y plane  | ![](./task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)  | ![](./task_3/foreman_qcif_0_y_dequantized.176x144.bmp) |
-| On Cb plane | ![](./task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)   | ![](./task_3/foreman_qcif_0_cb_dequantized.88x72.bmp)  |
-| On Cr plane | ![](./task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)   | ![](./task_3/foreman_qcif_0_cr_dequantized.88x72.bmp)  |
+| Original Image | Transformed Image (YUVDisplay.exe) |
+| -------------- | ---------------------------------- |
+| ![](./assets/foreman_qcif_{id}_rgb.bmp) | ![](#) |
 
+There are images in the YCbCr color space re-mapped to the grayscale color space below.
+
+|             | Before quantized | After de-quantized |
+| ----------- | ---------------- | ------------------ |
+| On Y plane  | ![](./task_3/foreman_qcif_{id}_y_before_quantized.176x144.bmp) | ![](./task_3/foreman_qcif_{id}_y_dequantized.176x144.bmp) |
+| On Cb plane | ![](./task_3/foreman_qcif_{id}_cb_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_{id}_cb_dequantized.88x72.bmp)  |
+| On Cr plane | ![](./task_3/foreman_qcif_{id}_cr_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_{id}_cr_dequantized.88x72.bmp)  |
+"""
+        for id in range(3)
+    )
+)
+print(
+    """\
+### Details
+
+The process workflow is as follows.
+
+```mermaid
+graph LR
+    dyuv[/Digital YCbCr images 16~235; 16~240/]
+    sub[Sub-sampling to 4:2:0]
+    qua[Quantization in 16 levels from 16~240]
+    enc[Encoding using Huffman coding]
+    bun[Bundle the encoded images with metadata]
+    ubu[Un-bundle the encoded images with metadata]
+    dec[Decoding using Huffman coding]
+    dqu[De-quantization in 16 levels to 16~240]
+    ups[Up-sampling from 4:2:0 to 4:4:4]
+
+    dyuv -->|1| sub
+    sub -->|2| qua
+    qua -->|3| enc
+    enc -->|4| bun
+    bun -->|5| ubu
+    ubu -->|6| dec
+    dec -->|7| dqu
+    dqu -->|8| ups
+    ups -->|9| dyuv
+```
 """
 )

@@ -60,12 +60,12 @@ The process workflow is as follows.
 
 ```mermaid
 graph LR
-    drgb[/Digital RGB Image 0~255/]
-    argb([Analog RGB Image 0.~1.])
+    drgb[/Digital RGB image 0~255/]
+    argb([Analog RGB image 0.~1.])
     tran[Transform RGB to YPbPr with BT.601]
-    ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
-    dyuv[/Digital YCbCr Image 16~235; 16~240/]
-    sub[Sub-sampling 4:2:0]
+    ayuv([Analog YPbPr image 0.~1.; -.5~.5])
+    dyuv[/Digital YCbCr image 16~235; 16~240/]
+    sub[Sub-sampling to 4:2:0]
     ups[Up-sampling from 4:2:0 to 4:4:4]
 
     drgb -->|1| argb
@@ -90,7 +90,7 @@ and pack them into a file in planar format.
 
 Display images.
 
-I added the up-sampled images and re-exported ones using `utils/YUVDisplay.exe`
+I added the up-sampled images and re-exported them using `utils/YUVDisplay.exe`
 for comparison purposes since they have the same size as the original ones.
 
 The images with sequence number `0` are displayed below.
@@ -256,14 +256,14 @@ The process workflow is as follows.
 
 ```mermaid
 graph LR
-    drgb[/Digital RGB Image 0~255/]
-    argb([Analog RGB Image 0.~1.])
+    drgb[/Digital RGB images 0~255/]
+    argb([Analog RGB images 0.~1.])
     tran[Transform RGB to YPbPr with BT.601]
-    ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
-    dyuv[/Digital YCbCr Image 16~235; 16~240/]
-    sub[Sub-sampling 4:2:0]
+    ayuv([Analog YPbPr images 0.~1.; -.5~.5])
+    dyuv[/Digital YCbCr images 16~235; 16~240/]
+    sub[Sub-sampling to 4:2:0]
     ups[Up-sampling from 4:2:0 to 4:4:4]
-    pack[Pack YCbCr frames in YUV420p format]
+    pack[Pack YCbCr images in YUV420p format]
 
     drgb -->|1| argb
     argb -->|2| tran
@@ -277,9 +277,17 @@ graph LR
 
 ## Task 3
 
-Quantize and encode YCbCr `4:2:0` images and recover them.
+Quantize in 16 levels and encode YCbCr `4:2:0` images and recover them.
 
-Taking quantization levels as symbols, here are the Huffman tree and code table used:
+Uses Huffman coding scheme.
+
+### Visual Comparison
+
+Display structures and images.
+
+There are 16 symbols in Huffman code table as the number of quantization levels.
+
+There are the code table and tree diagram of the Huffman tree used below.
 
 ```python
 {0: '10000001',
@@ -333,9 +341,9 @@ graph TD
     1010 --> 437
     1010 --> 573:2
     437 --> 32:1
-    437 --> 405
+    437 --> 405:0
     32:1
-    405
+    405:0
     573:2
     1434:3
     4231:4
@@ -351,16 +359,83 @@ graph TD
 
 ```
 
-### Comparison between the images without and with quantization
+I added assertion checks to ensure that
+the decoded images are equal to the quantized images.
+(See the module `src.tasks.quantize_and_encode_multi_frame_in_ycbcr420_and_back`)
 
-The quantized versions are visually different from the original RGB images.
+I added the re-exported images using `utils/YUVDisplay.exe`
+for comparison purposes since they have the same size as the original ones.
 
-The transformed image `0` on different Y, Cb and Cr planes in the grayscale colorspace:
+The images with sequence number `0` are displayed below.
 
-|             | Before quantization | After quantization & de-quantization |
-| ----------- | ------------------- | ------------------------------------ |
-| On Y plane  | ![](./task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp)  | ![](./task_3/foreman_qcif_0_y_dequantized.176x144.bmp) |
-| On Cb plane | ![](./task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)   | ![](./task_3/foreman_qcif_0_cb_dequantized.88x72.bmp)  |
-| On Cr plane | ![](./task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)   | ![](./task_3/foreman_qcif_0_cr_dequantized.88x72.bmp)  |
+There are the images in the RGB color space below.
 
+| Original Image | Transformed Image (YUVDisplay.exe) |
+| -------------- | ---------------------------------- |
+| ![](./assets/foreman_qcif_0_rgb.bmp) | ![](#) |
+
+There are images in the YCbCr color space re-mapped to the grayscale color space below.
+
+|             | Before quantized | After de-quantized |
+| ----------- | ---------------- | ------------------ |
+| On Y plane  | ![](./task_3/foreman_qcif_0_y_before_quantized.176x144.bmp) | ![](./task_3/foreman_qcif_0_y_dequantized.176x144.bmp) |
+| On Cb plane | ![](./task_3/foreman_qcif_0_cb_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_0_cb_dequantized.88x72.bmp)  |
+| On Cr plane | ![](./task_3/foreman_qcif_0_cr_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_0_cr_dequantized.88x72.bmp)  |
+The images with sequence number `1` are displayed below.
+
+There are the images in the RGB color space below.
+
+| Original Image | Transformed Image (YUVDisplay.exe) |
+| -------------- | ---------------------------------- |
+| ![](./assets/foreman_qcif_1_rgb.bmp) | ![](#) |
+
+There are images in the YCbCr color space re-mapped to the grayscale color space below.
+
+|             | Before quantized | After de-quantized |
+| ----------- | ---------------- | ------------------ |
+| On Y plane  | ![](./task_3/foreman_qcif_1_y_before_quantized.176x144.bmp) | ![](./task_3/foreman_qcif_1_y_dequantized.176x144.bmp) |
+| On Cb plane | ![](./task_3/foreman_qcif_1_cb_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_1_cb_dequantized.88x72.bmp)  |
+| On Cr plane | ![](./task_3/foreman_qcif_1_cr_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_1_cr_dequantized.88x72.bmp)  |
+The images with sequence number `2` are displayed below.
+
+There are the images in the RGB color space below.
+
+| Original Image | Transformed Image (YUVDisplay.exe) |
+| -------------- | ---------------------------------- |
+| ![](./assets/foreman_qcif_2_rgb.bmp) | ![](#) |
+
+There are images in the YCbCr color space re-mapped to the grayscale color space below.
+
+|             | Before quantized | After de-quantized |
+| ----------- | ---------------- | ------------------ |
+| On Y plane  | ![](./task_3/foreman_qcif_2_y_before_quantized.176x144.bmp) | ![](./task_3/foreman_qcif_2_y_dequantized.176x144.bmp) |
+| On Cb plane | ![](./task_3/foreman_qcif_2_cb_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_2_cb_dequantized.88x72.bmp)  |
+| On Cr plane | ![](./task_3/foreman_qcif_2_cr_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_2_cr_dequantized.88x72.bmp)  |
+
+### Details
+
+The process workflow is as follows.
+
+```mermaid
+graph LR
+    dyuv[/Digital YCbCr images 16~235; 16~240/]
+    sub[Sub-sampling to 4:2:0]
+    qua[Quantization in 16 levels from 16~240]
+    enc[Encoding using Huffman coding]
+    bun[Bundle the encoded images with metadata]
+    ubu[Un-bundle the encoded images with metadata]
+    dec[Decoding using Huffman coding]
+    dqu[De-quantization in 16 levels to 16~240]
+    ups[Up-sampling from 4:2:0 to 4:4:4]
+
+    dyuv -->|1| sub
+    sub -->|2| qua
+    qua -->|3| enc
+    enc -->|4| bun
+    bun -->|5| ubu
+    ubu -->|6| dec
+    dec -->|7| dqu
+    dqu -->|8| ups
+    ups -->|9| dyuv
+```
 

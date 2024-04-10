@@ -201,7 +201,7 @@ and pack them into a file in planar format.
 
 Display images.
 
-I added the up-sampled images and re-exported ones using `utils/YUVDisplay.exe`
+I added the up-sampled images and re-exported them using `utils/YUVDisplay.exe`
 for comparison purposes since they have the same size as the original ones.
 """
 )
@@ -266,14 +266,14 @@ The process workflow is as follows.
 
 ```mermaid
 graph LR
-    drgb[/Digital RGB Image 0~255/]
-    argb([Analog RGB Image 0.~1.])
+    drgb[/Digital RGB images 0~255/]
+    argb([Analog RGB images 0.~1.])
     tran[Transform RGB to YPbPr with BT.601]
-    ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
-    dyuv[/Digital YCbCr Image 16~235; 16~240/]
-    sub[Sub-sampling 4:2:0]
+    ayuv([Analog YPbPr images 0.~1.; -.5~.5])
+    dyuv[/Digital YCbCr images 16~235; 16~240/]
+    sub[Sub-sampling to 4:2:0]
     ups[Up-sampling from 4:2:0 to 4:4:4]
-    pack[Pack YCbCr frames in YUV420p format]
+    pack[Pack YCbCr images in YUV420p format]
 
     drgb -->|1| argb
     argb -->|2| tran

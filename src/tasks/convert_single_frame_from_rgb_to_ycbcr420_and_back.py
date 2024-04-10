@@ -241,12 +241,12 @@ The process workflow is as follows.
 
 ```mermaid
 graph LR
-    drgb[/Digital RGB Image 0~255/]
-    argb([Analog RGB Image 0.~1.])
+    drgb[/Digital RGB image 0~255/]
+    argb([Analog RGB image 0.~1.])
     tran[Transform RGB to YPbPr with BT.601]
-    ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
-    dyuv[/Digital YCbCr Image 16~235; 16~240/]
-    sub[Sub-sampling 4:2:0]
+    ayuv([Analog YPbPr image 0.~1.; -.5~.5])
+    dyuv[/Digital YCbCr image 16~235; 16~240/]
+    sub[Sub-sampling to 4:2:0]
     ups[Up-sampling from 4:2:0 to 4:4:4]
 
     drgb -->|1| argb

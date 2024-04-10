@@ -135,15 +135,17 @@ class HuffmanTree(Generic[_T]):
         """
         An internal method of `HuffmanTree.__repr__`
         """
-        symbol_repr = f":{self.symbol}" if self.symbol else ""
+        symbol_repr = f":{self.symbol}" if self.symbol is not None else ""
         node_repr = f"{self.frequency}{symbol_repr}"
         left_repr = f"{self.left._repr()}" if self.left else ""
         right_repr = f"{self.right._repr()}" if self.right else ""
         left_symbol_repr = (
-            f":{self.left.symbol}" if self.left and self.left.symbol else ""
+            f":{self.left.symbol}" if self.left and self.left.symbol is not None else ""
         )
         right_symbol_repr = (
-            f":{self.right.symbol}" if self.right and self.right.symbol else ""
+            f":{self.right.symbol}"
+            if self.right and self.right.symbol is not None
+            else ""
         )
         left_node_repr = (
             f" --> {self.left.frequency}{left_symbol_repr}" if self.left else ""
