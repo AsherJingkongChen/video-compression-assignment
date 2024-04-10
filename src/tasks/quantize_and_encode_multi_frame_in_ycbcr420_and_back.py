@@ -17,19 +17,23 @@ from typing import List, Tuple, TypeAlias
 
 from .utils.env import OUTPUTS_DIR_PATH
 from ..modules.coding import HuffmanTree
+from ..modules.data import packed_from_planar
 from ..modules.quant import quantize_evenly
-from ..modules.sample import SUBSAMPLING_SCHEME_420
 
 OUTPUTS_DIR_PATH = OUTPUTS_DIR_PATH / "task_3"
 OUTPUTS_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
 # Uses the values in the previous task
-from .convert_multi_frame_from_rgb_to_ycbcr420 import images_data_as_ycbcr
+from .convert_multi_frame_from_rgb_to_ycbcr420 import (
+    images_data_as_ycbcr,
+    COLOR,
+    KR,
+    KB,
+    SAMPLE,
+    SUBSAMPLING_SCHEME,
+)
 
 ImagesData: TypeAlias = List[Tuple[NDArray[uint8], NDArray[uint8], NDArray[uint8]]]
-
-# Uses sub-sampling scheme 4:2:0
-SUBSAMPLING_SCHEME = SUBSAMPLING_SCHEME_420()
 
 # Uses 16 levels (0 to 15) to quantize 225 possible intensities (16 to 240)
 # - Y, Cb and Cr components are 8-bit unsigned integers
@@ -170,11 +174,68 @@ for image_data_as_ycbcr_decoded in images_data_as_ycbcr_decoded:
 
     images_data_as_ycbcr_dequantized.append(image_data_as_ycbcr_dequantized)
 
+# 1. Up-sample the de-quantized YCbCr images from 4:2:0 to 4:4:4 scheme
+# 2. De-quantize the image from YCbCr to YPbPr
+# 3. Convert the image from YPbPr to analog RGB
+# 4. Quantize the image from analog RGB to digital RGB
+# - For comparison purposes
+images_data_as_drgb_upsampled: List[NDArray[uint8]] = []
+for image_data_as_ycbcr_dequantized in images_data_as_ycbcr_dequantized:
+    # 1. ...
+    (
+        image_data_as_y_dequantized,
+        image_data_as_cb_dequantized,
+        image_data_as_cr_dequantized,
+    ) = image_data_as_ycbcr_dequantized
+    image_data_as_y_upsampled = image_data_as_y_dequantized.copy()
+    image_data_as_cb_upsampled = SAMPLE.upsample(
+        SUBSAMPLING_SCHEME,
+        image_data_as_y_dequantized,
+        image_data_as_cb_dequantized,
+    )
+    image_data_as_cr_upsampled = SAMPLE.upsample(
+        SUBSAMPLING_SCHEME,
+        image_data_as_y_dequantized,
+        image_data_as_cr_dequantized,
+    )
+    image_data_as_ycbcr_upsampled = packed_from_planar(
+        (
+            image_data_as_y_upsampled,
+            image_data_as_cb_upsampled,
+            image_data_as_cr_upsampled,
+        )
+    )
+
+    # 2. ...
+    image_data_as_ypbpr_upsampled = COLOR.set_full_range(False).dequantize_ycbcr(
+        image_data_as_ycbcr_upsampled
+    )
+
+    # 3. ...
+    image_data_as_argb_upsampled = COLOR.rgb_from_ypbpr(
+        image_data_as_ypbpr_upsampled, KR, KB
+    )
+
+    # 4. ...
+    image_data_as_drgb_upsampled = COLOR.set_full_range(True).quantize_rgb(
+        image_data_as_argb_upsampled
+    )
+
+    images_data_as_drgb_upsampled.append(image_data_as_drgb_upsampled)
+
 ############################
 ###  Save the artifacts  ###
 ############################
 
+# Save the transformed images (de-quantized and up-sampled) in the 24-bit RGB BMP format
+for i, image_data_as_drgb_upsampled in enumerate(images_data_as_drgb_upsampled):
+    image_as_drgb_upsampled = Image.fromarray(image_data_as_drgb_upsampled, mode="RGB")
+    width, height = image_as_drgb_upsampled.size
+    image_as_drgb_upsampled.save(
+        OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_rgb_transformed.{width}x{height}.bmp"
+    )
 
+# Save the Y, Cb and Cr images before quantization in the 8-bit grayscale BMP format
 for i, image_data_as_ycbcr in enumerate(images_data_as_ycbcr):
     (
         image_data_as_y,
@@ -197,6 +258,7 @@ for i, image_data_as_ycbcr in enumerate(images_data_as_ycbcr):
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cr_before_quantized.{width}x{height}.bmp"
     )
 
+# Save the Y, Cb and Cr images after quantization and de-quantization in the 8-bit grayscale BMP format
 for i, image_data_as_ycbcr_dequantized in enumerate(images_data_as_ycbcr_dequantized):
     (
         image_data_as_y_dequantized,
@@ -223,10 +285,10 @@ for i, image_data_as_ycbcr_dequantized in enumerate(images_data_as_ycbcr_dequant
 ###  Report  ###
 ################
 
-# Assert that the recovered huffman tree is equal to the original one
+# Ensure that the recovered huffman tree is equal to the original one
 assert coding_tree.equal(coding_tree_re)
 
-# Assert that the decoded YCbCr images are equal to the quantized YCbCr images
+# Ensure that the decoded YCbCr images are equal to the quantized YCbCr images
 assert bool(images_data_as_ycbcr_quantized) and len(
     images_data_as_ycbcr_quantized
 ) == len(images_data_as_ycbcr_decoded)
@@ -282,7 +344,7 @@ There are the images in the RGB color space below.
 
 | Original Image | Transformed Image (YUVDisplay.exe) |
 | -------------- | ---------------------------------- |
-| ![](../assets/foreman_qcif_{id}_rgb.bmp) | ![](#) |
+| ![](../assets/foreman_qcif_{id}_rgb.bmp) | ![](./task_3/foreman_qcif_{id}_rgb_transformed.176x144.bmp) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
 

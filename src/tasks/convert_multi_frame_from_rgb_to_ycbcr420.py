@@ -88,7 +88,7 @@ for image_id in range(3):
         )
     )
 
-    # Up-sample the sub-sampled image in YCbCr color space using 4:2:0 scheme
+    # Up-sample the sub-sampled image in YCbCr color space from 4:2:0 to 4:4:4 scheme
     # - For comparison purposes
     image_data_as_y_upsampled = image_data_as_y.copy()
     image_data_as_cb_upsampled = SAMPLE.upsample(
@@ -220,7 +220,7 @@ for image_id in range(3):
         (image_y_upsampled, image_cb_upsampled, image_cr_upsampled)
     )
 
-# Save the sub-sampled YCbCr image in the planar format (YUV420p)
+# Save the sub-sampled YCbCr images in the planar format (YUV420p)
 height, width = images_data_as_ycbcr[0][0].shape
 with open(
     OUTPUTS_DIR_PATH / f"foreman_qcif_0-2_ycbcr.yuv420p.{width}x{height}.yuv",
@@ -256,8 +256,8 @@ The images with sequence number `{id}` are displayed below.
 
 There are the images in the RGB color space below.
 
-| Original Image | Transformed Image |
-| -------------- | ----------------- |
+| Copied Image | Transformed Image |
+| ------------ | ----------------- |
 | ![](./task_2/foreman_qcif_{id}_rgb_copied.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_rgb_transformed.176x144.bmp) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
