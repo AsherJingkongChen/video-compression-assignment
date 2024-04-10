@@ -1,9 +1,10 @@
 from PIL import Image
-from numpy import array, array_equal, uint8
+from numpy import array, uint8
 from numpy.typing import NDArray
 from typing import List, Tuple
 
 from .utils.env import ASSETS_DIR_PATH, OUTPUTS_DIR_PATH
+from .utils.report import get_metrics_report
 from ..modules.color import H273, KR_KB_BT601
 from ..modules.data import planar_from_packed, save_ycbcr_image
 from ..modules.sample import BT2100, SUBSAMPLING_SCHEME_420
@@ -181,49 +182,7 @@ with open(
 ##################
 
 
-def get_metrics_report(image_a: Image.Image, image_b: Image.Image) -> str:
-    from pprint import pformat
-    from numpy import Inf, int16
-    from skimage.metrics import (
-        mean_squared_error as get_mse,
-        normalized_root_mse as get_nrmse,
-        peak_signal_noise_ratio as get_psnr,
-        structural_similarity as get_ssim,
-    )
 
-    image_copied_data = array(image_a, dtype=uint8)
-    image_transformed_data = array(image_b, dtype=uint8)
-
-    mae = abs(
-        image_copied_data.astype(int16) - image_transformed_data.astype(int16)
-    ).mean()
-    mse = get_mse(image_copied_data, image_transformed_data)
-    nrmse = get_nrmse(image_copied_data, image_transformed_data)
-    if array_equal(image_copied_data, image_transformed_data):
-        psnr = Inf
-    else:
-        psnr = get_psnr(image_copied_data, image_transformed_data)
-    ssim = get_ssim(image_copied_data, image_transformed_data, channel_axis=-1)
-
-    mae_best = 0.0
-    mse_best = 0.0
-    nrmse_best = 0.0
-    psnr_best = Inf
-    ssim_best = 1.0
-
-    return f"""\
-```python
-{pformat(
-    [
-        ["<Metrics>", "<Score>", "<Goal>"],
-        ["MAE", f"{mae:.5f}", f"{mae_best:.5f}"],
-        ["MSE", f"{mse:.5f}", f"{mse_best:.5f}"],
-        ["NRMSE", f"{nrmse:.5f}", f"{nrmse_best:.5f}"],
-        ["PSNR", f"{psnr:.5f}", f"{psnr_best:.5f}"],
-        ["SSIM", f"{ssim:.5f}", f"{ssim_best:.5f}"],
-    ]
-)}
-```"""
 
 
 print(

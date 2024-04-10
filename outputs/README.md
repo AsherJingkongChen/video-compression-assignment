@@ -6,10 +6,12 @@ Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
 *Assume that the copied image is equivalent to the original image.*
 
-### Comparison between the copied and transformed RGB images
+### Statistical Comparison
 
-Below are the comparison metrics,
-they are computed between the copied and transformed images in the RGB color space:
+Compare between the copied and transformed images in the RGB color space.
+
+There are the metric results computed
+between the copied and transformed images below:
 
 ```python
 [['<Metrics>', '<Score>', '<Goal>'],
@@ -20,19 +22,18 @@ they are computed between the copied and transformed images in the RGB color spa
  ['SSIM', '0.99853', '1.00000']]
 ```
 
-The copied image in the RGB color space:
+### Visual Comparison
 
-![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)
+Display images.
 
-The transformed image in the RGB color space:
+There are the images in the RGB color space below; by the way,
+I add transformed images from YCbCr to RGB using `utils/YUVDisplay.exe`:
 
-![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)
+| Copied Image | Transformed Image (Mine) | Transformed Image (YUVDisplay.exe) |
+| ------------ | ------------------------ | ---------------------------------- |
+| ![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp) | ![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp) | ![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp) |
 
-The transformed image from re-exported using `utils/YUVDisplay.exe`:
-
-![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)
-
-The transformed image on different Y, Cb and Cr planes in the grayscale colorspace:
+There are the images in the YCbCr color space re-mapped in the grayscale colorspace:
 
 |             | Before sub-sampling | After sub-sampling | After up-sampling |
 | ----------- | ------------------- | ------------------ | ----------------- |
@@ -44,28 +45,7 @@ The transformed image on different Y, Cb and Cr planes in the grayscale colorspa
 
 The workflow is as follows:
 
-```mermaid
-graph LR
-    drgb[/Digital RGB Image 0~255/]
-    argb([Analog RGB Image 0.~1.])
-    tran[Transform RGB to YPbPr with BT.601]
-    ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
-    dyuv[/Digital YCbCr Image 16~235; 16~240/]
-    sub[Sub-sampling 4:2:0]
-    ups[Up-sampling from 4:2:0 to 4:4:4]
-
-    drgb -->|1| argb
-    argb -->|2| tran
-    tran -->|3| ayuv
-    ayuv -->|4| dyuv
-    dyuv -->|5| sub
-    sub -->|6| ups
-    ups -->|7| dyuv
-    dyuv -->|8| ayuv
-    ayuv -->|9| tran
-    tran -->|10| argb
-    argb -->|11| drgb
-```
+![diagram](./README-1.svg)
 
 ## Task 2
 
@@ -174,26 +154,7 @@ The image pair on Cr plane:
 
 The workflow is as follows:
 
-```mermaid
-graph LR
-    drgb[/Digital RGB Image 0~255/]
-    argb([Analog RGB Image 0.~1.])
-    tran[Transform RGB to YPbPr with BT.601]
-    ayuv([Analog YPbPr Image 0.~1.; -.5~.5])
-    dyuv[/Digital YCbCr Image 16~235; 16~240/]
-    sub[Sub-sampling 4:2:0]
-    ups[Up-sampling from 4:2:0 to 4:4:4]
-    pack[Pack YCbCr frames in YUV420p format]
-
-    drgb -->|1| argb
-    argb -->|2| tran
-    tran -->|3| ayuv
-    ayuv -->|4| dyuv
-    dyuv -->|5| sub
-    sub -->|6| pack
-    sub -->|7| ups
-    ups -->|8| dyuv
-```
+![diagram](./README-2.svg)
 
 ## Task 3
 
@@ -220,56 +181,7 @@ Taking quantization levels as symbols, here are the Huffman tree and code table 
  15: '0011'}
 ```
 
-```mermaid
-graph TD
-    114048 --> 46189
-    114048 --> 67859
-    46189 --> 21124
-    46189 --> 25065:7
-    21124 --> 9342
-    21124 --> 11782
-    9342 --> 4350
-    9342 --> 4992:12
-    4350 --> 2127:11
-    4350 --> 2223:10
-    2127:11
-    2223:10
-    4992:12
-    11782 --> 5697:9
-    11782 --> 6085:15
-    5697:9
-    6085:15
-    25065:7
-    67859 --> 29119
-    67859 --> 38740
-    29119 --> 13400
-    29119 --> 15719:13
-    13400 --> 6675
-    13400 --> 6725:5
-    6675 --> 2444
-    6675 --> 4231:4
-    2444 --> 1010
-    2444 --> 1434:3
-    1010 --> 437
-    1010 --> 573:2
-    437 --> 32:1
-    437 --> 405
-    32:1
-    405
-    573:2
-    1434:3
-    4231:4
-    6725:5
-    15719:13
-    38740 --> 17626
-    38740 --> 21114:8
-    17626 --> 8314:6
-    17626 --> 9312:14
-    8314:6
-    9312:14
-    21114:8
-
-```
+![diagram](./README-3.svg)
 
 ### Comparison between the images without and with quantization
 

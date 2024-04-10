@@ -1,6 +1,6 @@
 from PIL import Image
 from numpy import array, uint8
-from .utils.env import ASSETS_DIR_PATH, OUTPUTS_DIR_PATH
+
 from ..modules.color import H273, KR_KB_BT601
 from ..modules.data import (
     packed_from_planar,
@@ -8,6 +8,8 @@ from ..modules.data import (
     save_ycbcr_image,
 )
 from ..modules.sample import BT2100, SUBSAMPLING_SCHEME_420
+from .utils.env import ASSETS_DIR_PATH, OUTPUTS_DIR_PATH
+from .utils.report import get_metrics_report
 
 OUTPUTS_DIR_PATH = OUTPUTS_DIR_PATH / "task_1"
 OUTPUTS_DIR_PATH.mkdir(parents=True, exist_ok=True)
@@ -178,35 +180,10 @@ with open(
         ),
     )
 
-##################
-###  Analysis  ###
-##################
+################
+###  Report  ###
+################
 
-from pprint import pformat
-from numpy import Inf, int16
-from skimage.metrics import (
-    mean_squared_error as get_mse,
-    normalized_root_mse as get_nrmse,
-    peak_signal_noise_ratio as get_psnr,
-    structural_similarity as get_ssim,
-)
-
-image_copied_data = array(image_copied, dtype=uint8)
-image_transformed_data = array(image_transformed, dtype=uint8)
-
-mae = abs(image_copied_data.astype(int16) - image_transformed_data.astype(int16)).mean()
-mse = get_mse(image_copied_data, image_transformed_data)
-nrmse = get_nrmse(image_copied_data, image_transformed_data)
-psnr = get_psnr(image_copied_data, image_transformed_data)
-ssim = get_ssim(image_copied_data, image_transformed_data, channel_axis=-1)
-
-mae_best = 0.0
-mse_best = 0.0
-nrmse_best = 0.0
-psnr_best = Inf
-ssim_best = 1.0
-
-# Show the metrics
 print(
     f"""\
 # Assignment 1 Code Outputs
@@ -217,47 +194,34 @@ Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
 *Assume that the copied image is equivalent to the original image.*
 
-### Comparison between the copied and transformed RGB images
+### Visual Comparison
 
-Below are the comparison metrics,
-they are computed between the copied and transformed images in the RGB color space:
+Display images.
 
-```python
-{pformat(
-    [
-        ["<Metrics>", "<Score>", "<Goal>"],
-        ["MAE", f"{mae:.5f}", f"{mae_best:.5f}"],
-        ["MSE", f"{mse:.5f}", f"{mse_best:.5f}"],
-        ["NRMSE", f"{nrmse:.5f}", f"{nrmse_best:.5f}"],
-        ["PSNR", f"{psnr:.5f}", f"{psnr_best:.5f}"],
-        ["SSIM", f"{ssim:.5f}", f"{ssim_best:.5f}"],
-    ]
-)}
-```
+There are the images in the RGB color space below; by the way,
+I added transformed images from YCbCr to RGB using `utils/YUVDisplay.exe`:
 
-The copied image in the RGB color space:
+| Copied Image | Transformed Image (Mine) | Transformed Image (YUVDisplay.exe) |
+| ------------ | ------------------------ | ---------------------------------- |
+| ![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp) | ![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp) | ![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp) |
 
-![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp)
-
-The transformed image in the RGB color space:
-
-![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp)
-
-The transformed image from re-exported using `utils/YUVDisplay.exe`:
-
-![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)
-
-The transformed image on different Y, Cb and Cr planes in the grayscale colorspace:
+There are the images in the YCbCr color space re-mapped in the grayscale colorspace:
 
 |             | Before sub-sampling | After sub-sampling | After up-sampling |
 | ----------- | ------------------- | ------------------ | ----------------- |
 | On Y plane  | ![](./task_1/foreman_qcif_0_y_default.176x144.bmp)  | ![](./task_1/foreman_qcif_0_y_subsampled.176x144.bmp) | ![](./task_1/foreman_qcif_0_y_upsampled.176x144.bmp)  |
 | On Cb plane | ![](./task_1/foreman_qcif_0_cb_default.176x144.bmp) | ![](./task_1/foreman_qcif_0_cb_subsampled.88x72.bmp)  | ![](./task_1/foreman_qcif_0_cb_upsampled.176x144.bmp) |
 | On Cr plane | ![](./task_1/foreman_qcif_0_cr_default.176x144.bmp) | ![](./task_1/foreman_qcif_0_cr_subsampled.88x72.bmp)  | ![](./task_1/foreman_qcif_0_cr_upsampled.176x144.bmp) |
-"""
-)
-print(
-    """\
+
+### Statistical Comparison
+
+Compare between the copied and transformed images in the RGB color space.
+
+There are the metric results computed
+between the copied and transformed images below:
+
+{get_metrics_report(image_copied, image_transformed)}
+
 ### Details
 
 The workflow is as follows:
