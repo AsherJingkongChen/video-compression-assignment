@@ -74,7 +74,7 @@ class HuffmanTree(Generic[_T]):
         - The Huffman code of the symbol as `str`
         """
 
-        return self._get_codetable[symbol]
+        return self._codetable[symbol]
 
     def equal(self, other: "HuffmanTree[_T]") -> bool:
         """
@@ -112,24 +112,24 @@ class HuffmanTree(Generic[_T]):
         raise ValueError()
 
     @cached_property
-    def _get_codetable(self) -> Dict[_T, str]:
+    def _codetable(self) -> Dict[_T, str]:
         """
         An internal method of `HuffmanTree.encode`
         """
 
-        return dict(self._get_codetable_2(""))
+        return dict(self._get_codetable(""))
 
-    def _get_codetable_2(self, prefix: str) -> Iterable[Tuple[_T, str]]:
+    def _get_codetable(self, prefix: str) -> Iterable[Tuple[_T, str]]:
         """
-        An internal method of `HuffmanTree._get_codetable`
+        An internal method of `HuffmanTree._codetable`
         """
 
         if not self.left and not self.right:
             yield (self.symbol, prefix)
         if self.left:
-            yield from self.left._get_codetable_2(prefix + "0")
+            yield from self.left._get_codetable(prefix + "0")
         if self.right:
-            yield from self.right._get_codetable_2(prefix + "1")
+            yield from self.right._get_codetable(prefix + "1")
 
     def _repr(self) -> str:
         """
@@ -204,7 +204,7 @@ class HuffmanTree(Generic[_T]):
 
         return f"""\
 ```python
-{pformat(self._get_codetable)}
+{pformat(self._codetable)}
 ```
 
 ```mermaid
