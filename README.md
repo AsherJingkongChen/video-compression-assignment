@@ -12,10 +12,10 @@ See the [`outputs/`](./outputs/) directory for the outputs.
 
 1. Install the requirements
 ```shell
-pip install -Ur requirements.txt
+python3 -m pip pip install -Ur requirements.txt
 ```
 
 2. Run all the tasks
 ```shell
-python run_tasks.py
+python3 run_tasks.py
 ```
