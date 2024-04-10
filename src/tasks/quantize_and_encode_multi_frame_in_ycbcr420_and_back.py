@@ -13,7 +13,7 @@ from numpy import (
 )
 from numpy.typing import NDArray
 from PIL import Image
-from typing import List, Tuple, TypeAlias
+from typing import List, Tuple
 
 from .utils.env import OUTPUTS_DIR_PATH
 from .utils.report import get_metrics_report
@@ -34,7 +34,7 @@ from .convert_multi_frame_from_rgb_to_ycbcr420 import (
     SUBSAMPLING_SCHEME,
 )
 
-ImagesData: TypeAlias = List[Tuple[NDArray[uint8], NDArray[uint8], NDArray[uint8]]]
+ImagesData = List[Tuple[NDArray[uint8], NDArray[uint8], NDArray[uint8]]]
 
 # Uses 16 levels (0 to 15) to quantize 225 possible intensities (16 to 240)
 # - Y, Cb and Cr components are 8-bit unsigned integers
@@ -256,13 +256,13 @@ for i, image_data_as_ycbcr in enumerate(images_data_as_ycbcr):
     image_as_cb.save(
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cb_before_quantized.{width}x{height}.bmp"
     )
-    
+
     image_as_cr = Image.fromarray(image_data_as_cr, mode="L")
     width, height = image_as_cr.size
     image_as_cr.save(
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cr_before_quantized.{width}x{height}.bmp"
     )
-    
+
     images_as_ycbcr.append((image_as_y, image_as_cb, image_as_cr))
 
 # Save the Y, Cb and Cr images after quantization and de-quantization in the 8-bit grayscale BMP format
@@ -292,11 +292,13 @@ for i, image_data_as_ycbcr_dequantized in enumerate(images_data_as_ycbcr_dequant
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cr_dequantized.{width}x{height}.bmp"
     )
 
-    images_as_ycbcr_dequantized.append((
-        image_as_y_dequantized,
-        image_as_cb_dequantized,
-        image_as_cr_dequantized,
-    ))
+    images_as_ycbcr_dequantized.append(
+        (
+            image_as_y_dequantized,
+            image_as_cb_dequantized,
+            image_as_cr_dequantized,
+        )
+    )
 
 ################
 ###  Report  ###

@@ -193,6 +193,7 @@ print(
 1. Install the requirements
 
     ```shell
+    python3 -V # Not less than 3.9.0
     python3 -m pip install -Ur requirements.txt
     ```
 

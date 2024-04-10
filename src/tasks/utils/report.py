@@ -1,5 +1,6 @@
 from PIL.Image import Image
 
+
 def get_metrics_report(image_a: Image, image_b: Image) -> str:
     from pprint import pformat
     from numpy import array, array_equal, Inf, uint8, int16

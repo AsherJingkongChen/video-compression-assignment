@@ -1,3 +1,4 @@
+Minimum-Supported-Python-Version==3.9 ; python_version<'3.9'
 bitstring>=4.1.4
 black>=24.3.0
 numpy>=1.26.4
