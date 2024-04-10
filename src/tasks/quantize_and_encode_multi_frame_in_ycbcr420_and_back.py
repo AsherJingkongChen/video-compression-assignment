@@ -282,7 +282,7 @@ There are the images in the RGB color space below.
 
 | Original Image | Transformed Image (YUVDisplay.exe) |
 | -------------- | ---------------------------------- |
-| ![](./assets/foreman_qcif_{id}_rgb.bmp) | ![](#) |
+| ![](../assets/foreman_qcif_{id}_rgb.bmp) | ![](#) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
@@ -291,6 +291,7 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_3/foreman_qcif_{id}_y_before_quantized.176x144.bmp) | ![](./task_3/foreman_qcif_{id}_y_dequantized.176x144.bmp) |
 | On Cb plane | ![](./task_3/foreman_qcif_{id}_cb_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_{id}_cb_dequantized.88x72.bmp)  |
 | On Cr plane | ![](./task_3/foreman_qcif_{id}_cr_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_{id}_cr_dequantized.88x72.bmp)  |
+
 """
         for id in range(3)
     )

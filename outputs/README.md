@@ -3,14 +3,16 @@
 ## Reproduction
 
 1. Install the requirements
-```shell
-python3 -m pip install -Ur requirements.txt
-```
+
+    ```shell
+    python3 -m pip install -Ur requirements.txt
+    ```
 
 2. Run all the tasks
-```shell
-python3 run_tasks.py
-```
+
+    ```shell
+    python3 run_tasks.py
+    ```
 
 ## Task 1
 
@@ -22,13 +24,11 @@ Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
 Display images.
 
-I added transformed images from YCbCr to RGB using `utils/YUVDisplay.exe`.
-
 There are the images in the RGB color space below.
 
-| Copied Image | Transformed Image (Mine) | Transformed Image (YUVDisplay.exe) |
-| ------------ | ------------------------ | ---------------------------------- |
-| ![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp) | ![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp) | ![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp) |
+| Copied Image | Transformed Image |
+| ------------ | ----------------- |
+| ![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp) | ![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp) |
 
 There are the images in the YCbCr color space re-mapped to the grayscale colorspace below.
 
@@ -69,16 +69,17 @@ and pack them into a file in planar format.
 
 Display images.
 
-I added the up-sampled images and re-exported them using `utils/YUVDisplay.exe`
-for comparison purposes since they have the same size as the original ones.
+I added the up-sampled images for comparison purposes
+since they have the same size as the original ones.
+
 
 The images with sequence number `0` are displayed below.
 
 There are the images in the RGB color space below.
 
-| Original Image | Transformed Image (YUVDisplay.exe) |
-| -------------- | ---------------------------------- |
-| ![](./assets/foreman_qcif_0_rgb.bmp) | ![](./task_2/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp) |
+| Original Image | Transformed Image |
+| -------------- | ----------------- |
+| ![](./task_2/foreman_qcif_0_rgb_copied.176x144.bmp) | ![](./task_2/foreman_qcif_0_rgb_transformed.176x144.bmp) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
@@ -87,13 +88,14 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)  | ![](./task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)  |
 | On Cb plane | ![](./task_2/foreman_qcif_0_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_0_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | ![](./task_2/foreman_qcif_0_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_0_cr_with_upsampling.176x144.bmp) |
+
 The images with sequence number `1` are displayed below.
 
 There are the images in the RGB color space below.
 
-| Original Image | Transformed Image (YUVDisplay.exe) |
-| -------------- | ---------------------------------- |
-| ![](./assets/foreman_qcif_1_rgb.bmp) | ![](./task_2/foreman_qcif_1_ycbcr.yuv420p.176x144.yuv.bmp) |
+| Original Image | Transformed Image |
+| -------------- | ----------------- |
+| ![](./task_2/foreman_qcif_1_rgb_copied.176x144.bmp) | ![](./task_2/foreman_qcif_1_rgb_transformed.176x144.bmp) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
@@ -102,13 +104,14 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_2/foreman_qcif_1_y_without_subsampling.176x144.bmp)  | ![](./task_2/foreman_qcif_1_y_with_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_1_y_with_upsampling.176x144.bmp)  |
 | On Cb plane | ![](./task_2/foreman_qcif_1_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_1_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_1_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | ![](./task_2/foreman_qcif_1_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_1_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_1_cr_with_upsampling.176x144.bmp) |
+
 The images with sequence number `2` are displayed below.
 
 There are the images in the RGB color space below.
 
-| Original Image | Transformed Image (YUVDisplay.exe) |
-| -------------- | ---------------------------------- |
-| ![](./assets/foreman_qcif_2_rgb.bmp) | ![](./task_2/foreman_qcif_2_ycbcr.yuv420p.176x144.yuv.bmp) |
+| Original Image | Transformed Image |
+| -------------- | ----------------- |
+| ![](./task_2/foreman_qcif_2_rgb_copied.176x144.bmp) | ![](./task_2/foreman_qcif_2_rgb_transformed.176x144.bmp) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
@@ -117,6 +120,7 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_2/foreman_qcif_2_y_without_subsampling.176x144.bmp)  | ![](./task_2/foreman_qcif_2_y_with_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_2_y_with_upsampling.176x144.bmp)  |
 | On Cb plane | ![](./task_2/foreman_qcif_2_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_2_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_2_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | ![](./task_2/foreman_qcif_2_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_2_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_2_cr_with_upsampling.176x144.bmp) |
+
 
 ### Statistical Comparison
 
@@ -160,6 +164,7 @@ On the Cr plane:
  ['PSNR', '54.66139', 'inf'],
  ['SSIM', '0.99976', '1.00000']]
 ```
+
 The image pair with sequence number `1`:
 
 On the Y plane:
@@ -194,6 +199,7 @@ On the Cr plane:
  ['PSNR', '54.78492', 'inf'],
  ['SSIM', '0.99980', '1.00000']]
 ```
+
 The image pair with sequence number `2`:
 
 On the Y plane:
@@ -228,6 +234,7 @@ On the Cr plane:
  ['PSNR', '54.74938', 'inf'],
  ['SSIM', '0.99982', '1.00000']]
 ```
+
 
 ### Details
 
@@ -283,7 +290,7 @@ There are the images in the RGB color space below.
 
 | Original Image | Transformed Image (YUVDisplay.exe) |
 | -------------- | ---------------------------------- |
-| ![](./assets/foreman_qcif_0_rgb.bmp) | ![](#) |
+| ![](../assets/foreman_qcif_0_rgb.bmp) | ![](#) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
@@ -292,13 +299,14 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_3/foreman_qcif_0_y_before_quantized.176x144.bmp) | ![](./task_3/foreman_qcif_0_y_dequantized.176x144.bmp) |
 | On Cb plane | ![](./task_3/foreman_qcif_0_cb_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_0_cb_dequantized.88x72.bmp)  |
 | On Cr plane | ![](./task_3/foreman_qcif_0_cr_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_0_cr_dequantized.88x72.bmp)  |
+
 The images with sequence number `1` are displayed below.
 
 There are the images in the RGB color space below.
 
 | Original Image | Transformed Image (YUVDisplay.exe) |
 | -------------- | ---------------------------------- |
-| ![](./assets/foreman_qcif_1_rgb.bmp) | ![](#) |
+| ![](../assets/foreman_qcif_1_rgb.bmp) | ![](#) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
@@ -307,13 +315,14 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_3/foreman_qcif_1_y_before_quantized.176x144.bmp) | ![](./task_3/foreman_qcif_1_y_dequantized.176x144.bmp) |
 | On Cb plane | ![](./task_3/foreman_qcif_1_cb_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_1_cb_dequantized.88x72.bmp)  |
 | On Cr plane | ![](./task_3/foreman_qcif_1_cr_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_1_cr_dequantized.88x72.bmp)  |
+
 The images with sequence number `2` are displayed below.
 
 There are the images in the RGB color space below.
 
 | Original Image | Transformed Image (YUVDisplay.exe) |
 | -------------- | ---------------------------------- |
-| ![](./assets/foreman_qcif_2_rgb.bmp) | ![](#) |
+| ![](../assets/foreman_qcif_2_rgb.bmp) | ![](#) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
@@ -322,6 +331,7 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_3/foreman_qcif_2_y_before_quantized.176x144.bmp) | ![](./task_3/foreman_qcif_2_y_dequantized.176x144.bmp) |
 | On Cb plane | ![](./task_3/foreman_qcif_2_cb_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_2_cb_dequantized.88x72.bmp)  |
 | On Cr plane | ![](./task_3/foreman_qcif_2_cr_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_2_cr_dequantized.88x72.bmp)  |
+
 
 ### Details
 

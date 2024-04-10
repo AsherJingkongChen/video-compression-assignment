@@ -6,7 +6,7 @@ from typing import List, Tuple
 from .utils.env import ASSETS_DIR_PATH, OUTPUTS_DIR_PATH
 from .utils.report import get_metrics_report
 from ..modules.color import H273, KR_KB_BT601
-from ..modules.data import planar_from_packed, save_ycbcr_image
+from ..modules.data import packed_from_planar, planar_from_packed, save_ycbcr_image
 from ..modules.sample import BT2100, SUBSAMPLING_SCHEME_420
 
 __all__ = ["images_data_as_ycbcr"]
@@ -101,10 +101,52 @@ for image_id in range(3):
         image_data_as_y_subsampled,
         image_data_as_cr_subsampled,
     )
+    image_data_as_ycbcr_upsampled = packed_from_planar(
+        (
+            image_data_as_y_upsampled,
+            image_data_as_cb_upsampled,
+            image_data_as_cr_upsampled,
+        )
+    )
+
+    # De-quantize the image from YCbCr to YPbPr
+    # - For comparison purposes
+    image_data_as_ypbpr_transformed = COLOR.set_full_range(False).dequantize_ycbcr(
+        image_data_as_ycbcr_upsampled
+    )
+
+    # Convert the image from YPbPr to analog RGB
+    # - For comparison purposes
+    image_data_as_argb_transformed = COLOR.rgb_from_ypbpr(
+        image_data_as_ypbpr_transformed, KR, KB
+    )
+
+    # Quantize the image from analog RGB to digital RGB
+    # - For comparison purposes
+    image_data_as_drgb_transformed = COLOR.set_full_range(True).quantize_rgb(
+        image_data_as_argb_transformed
+    )
 
     ############################
     ###  Save the artifacts  ###
     ############################
+
+    # Save the copied image in the 24-bit RGB BMP format
+    # - This is for comparison with the transformed image
+    image_copied = Image.fromarray(image_data_as_drgb, mode="RGB")
+    width, height = image_copied.size
+    image_copied.save(
+        OUTPUTS_DIR_PATH / f"foreman_qcif_{image_id}_rgb_copied.{width}x{height}.bmp"
+    )
+
+    # Save the transformed image in the 24-bit RGB BMP format
+    # - For comparison purposes
+    image_transformed = Image.fromarray(image_data_as_drgb_transformed, mode="RGB")
+    width, height = image_transformed.size
+    image_transformed.save(
+        OUTPUTS_DIR_PATH
+        / f"foreman_qcif_{image_id}_rgb_transformed.{width}x{height}.bmp"
+    )
 
     # Save the Y, Cb and Cr images without sub-sampling in the 8-bit grayscale BMP format
     image_y = Image.fromarray(image_data_as_y, mode="L")
@@ -127,6 +169,8 @@ for image_id in range(3):
         OUTPUTS_DIR_PATH
         / f"foreman_qcif_{image_id}_cr_without_subsampling.{width}x{height}.bmp"
     )
+
+    images_as_ycbcr.append((image_y, image_cb, image_cr))
 
     # Save the Y, Cb and Cr images with sub-sampling in the 8-bit grayscale BMP format
     image_y_subsampled = Image.fromarray(image_data_as_y_subsampled, mode="L")
@@ -172,7 +216,6 @@ for image_id in range(3):
         / f"foreman_qcif_{image_id}_cr_with_upsampling.{width}x{height}.bmp"
     )
 
-    images_as_ycbcr.append((image_y, image_cb, image_cr))
     images_as_ycbcr_upsampled.append(
         (image_y_upsampled, image_cb_upsampled, image_cr_upsampled)
     )
@@ -201,8 +244,9 @@ and pack them into a file in planar format.
 
 Display images.
 
-I added the up-sampled images and re-exported them using `utils/YUVDisplay.exe`
-for comparison purposes since they have the same size as the original ones.
+I added the up-sampled images for comparison purposes
+since they have the same size as the original ones.
+
 """
 )
 print(
@@ -212,9 +256,9 @@ The images with sequence number `{id}` are displayed below.
 
 There are the images in the RGB color space below.
 
-| Original Image | Transformed Image (YUVDisplay.exe) |
-| -------------- | ---------------------------------- |
-| ![](./assets/foreman_qcif_{id}_rgb.bmp) | ![](./task_2/foreman_qcif_{id}_ycbcr.yuv420p.176x144.yuv.bmp) |
+| Original Image | Transformed Image |
+| -------------- | ----------------- |
+| ![](./task_2/foreman_qcif_{id}_rgb_copied.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_rgb_transformed.176x144.bmp) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
@@ -223,6 +267,7 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_2/foreman_qcif_{id}_y_without_subsampling.176x144.bmp)  | ![](./task_2/foreman_qcif_{id}_y_with_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_y_with_upsampling.176x144.bmp)  |
 | On Cb plane | ![](./task_2/foreman_qcif_{id}_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_{id}_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | ![](./task_2/foreman_qcif_{id}_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_{id}_cr_with_upsampling.176x144.bmp) |
+
 """
         for id in range(3)
     )
@@ -254,6 +299,7 @@ On the Cb plane:
 On the Cr plane:
 
 {get_metrics_report(images_as_ycbcr[id][2], images_as_ycbcr_upsampled[id][2])}
+
 """
         for id in range(3)
     )

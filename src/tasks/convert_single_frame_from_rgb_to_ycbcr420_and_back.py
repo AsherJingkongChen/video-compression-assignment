@@ -102,7 +102,7 @@ image_data_as_drgb_transformed = COLOR.set_full_range(True).quantize_rgb(
 ############################
 
 # Save the copied image in the 24-bit RGB BMP format
-# - This is for further comparison with the transformed image
+# - This is for comparison with the transformed image
 image_copied = Image.fromarray(image_data_as_drgb, mode="RGB")
 width, height = image_copied.size
 image_copied.save(OUTPUTS_DIR_PATH / f"foreman_qcif_0_rgb_copied.{width}x{height}.bmp")
@@ -191,14 +191,16 @@ print(
 ## Reproduction
 
 1. Install the requirements
-```shell
-python3 -m pip install -Ur requirements.txt
-```
+
+    ```shell
+    python3 -m pip install -Ur requirements.txt
+    ```
 
 2. Run all the tasks
-```shell
-python3 run_tasks.py
-```
+
+    ```shell
+    python3 run_tasks.py
+    ```
 
 ## Task 1
 
@@ -210,13 +212,11 @@ Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
 Display images.
 
-I added transformed images from YCbCr to RGB using `utils/YUVDisplay.exe`.
-
 There are the images in the RGB color space below.
 
-| Copied Image | Transformed Image (Mine) | Transformed Image (YUVDisplay.exe) |
-| ------------ | ------------------------ | ---------------------------------- |
-| ![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp) | ![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp) | ![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp) |
+| Copied Image | Transformed Image |
+| ------------ | ----------------- |
+| ![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp) | ![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp) |
 
 There are the images in the YCbCr color space re-mapped to the grayscale colorspace below.
 
