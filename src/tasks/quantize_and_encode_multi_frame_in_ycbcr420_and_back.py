@@ -16,6 +16,7 @@ from PIL import Image
 from typing import List, Tuple, TypeAlias
 
 from .utils.env import OUTPUTS_DIR_PATH
+from .utils.report import get_metrics_report
 from ..modules.coding import HuffmanTree
 from ..modules.data import packed_from_planar
 from ..modules.quant import quantize_evenly
@@ -236,6 +237,7 @@ for i, image_data_as_drgb_upsampled in enumerate(images_data_as_drgb_upsampled):
     )
 
 # Save the Y, Cb and Cr images before quantization in the 8-bit grayscale BMP format
+images_as_ycbcr: List[Tuple[Image.Image, Image.Image, Image.Image]] = []
 for i, image_data_as_ycbcr in enumerate(images_data_as_ycbcr):
     (
         image_data_as_y,
@@ -243,22 +245,28 @@ for i, image_data_as_ycbcr in enumerate(images_data_as_ycbcr):
         image_data_as_cr,
     ) = image_data_as_ycbcr
 
-    height, width = image_data_as_y.shape
-    Image.fromarray(image_data_as_y, mode="L").save(
+    image_as_y = Image.fromarray(image_data_as_y, mode="L")
+    width, height = image_as_y.size
+    image_as_y.save(
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_y_before_quantized.{width}x{height}.bmp"
     )
 
-    height, width = image_data_as_cb.shape
-    Image.fromarray(image_data_as_cb, mode="L").save(
+    image_as_cb = Image.fromarray(image_data_as_cb, mode="L")
+    width, height = image_as_cb.size
+    image_as_cb.save(
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cb_before_quantized.{width}x{height}.bmp"
     )
-
-    height, width = image_data_as_cr.shape
-    Image.fromarray(image_data_as_cr, mode="L").save(
+    
+    image_as_cr = Image.fromarray(image_data_as_cr, mode="L")
+    width, height = image_as_cr.size
+    image_as_cr.save(
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cr_before_quantized.{width}x{height}.bmp"
     )
+    
+    images_as_ycbcr.append((image_as_y, image_as_cb, image_as_cr))
 
 # Save the Y, Cb and Cr images after quantization and de-quantization in the 8-bit grayscale BMP format
+images_as_ycbcr_dequantized: List[Tuple[Image.Image, Image.Image, Image.Image]] = []
 for i, image_data_as_ycbcr_dequantized in enumerate(images_data_as_ycbcr_dequantized):
     (
         image_data_as_y_dequantized,
@@ -266,20 +274,29 @@ for i, image_data_as_ycbcr_dequantized in enumerate(images_data_as_ycbcr_dequant
         image_data_as_cr_dequantized,
     ) = image_data_as_ycbcr_dequantized
 
-    height, width = image_data_as_y_dequantized.shape
-    Image.fromarray(image_data_as_y_dequantized, mode="L").save(
+    image_as_y_dequantized = Image.fromarray(image_data_as_y_dequantized, mode="L")
+    width, height = image_as_y_dequantized.size
+    image_as_y_dequantized.save(
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_y_dequantized.{width}x{height}.bmp"
     )
 
-    height, width = image_data_as_cb_dequantized.shape
-    Image.fromarray(image_data_as_cb_dequantized, mode="L").save(
+    image_as_cb_dequantized = Image.fromarray(image_data_as_cb_dequantized, mode="L")
+    width, height = image_as_cb_dequantized.size
+    image_as_cb_dequantized.save(
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cb_dequantized.{width}x{height}.bmp"
     )
 
-    height, width = image_data_as_cr_dequantized.shape
-    Image.fromarray(image_data_as_cr_dequantized, mode="L").save(
+    image_as_cr_dequantized = Image.fromarray(image_data_as_cr_dequantized, mode="L")
+    width, height = image_as_cr_dequantized.size
+    image_as_cr_dequantized.save(
         OUTPUTS_DIR_PATH / f"foreman_qcif_{i}_cr_dequantized.{width}x{height}.bmp"
     )
+
+    images_as_ycbcr_dequantized.append((
+        image_as_y_dequantized,
+        image_as_cb_dequantized,
+        image_as_cr_dequantized,
+    ))
 
 ################
 ###  Report  ###
@@ -331,19 +348,16 @@ I added assertion checks to ensure that
 the decoded images are equal to the quantized images.
 (See the module `{__name__}`)
 
-I added the re-exported images using `utils/YUVDisplay.exe`
-for comparison purposes since they have the same size as the original ones.
-"""
-)
-print(
-    "".join(
-        f"""\
+I added the up-sampled images for comparison purposes
+since they have the same size as the original ones.
+{"".join(
+        f'''
 The images with sequence number `{id}` are displayed below.
 
 There are the images in the RGB color space below.
 
-| Original Image | Transformed Image (YUVDisplay.exe) |
-| -------------- | ---------------------------------- |
+| Original Image | Transformed Image |
+| -------------- | ----------------- |
 | ![](../assets/foreman_qcif_{id}_rgb.bmp) | ![](./task_3/foreman_qcif_{id}_rgb_transformed.176x144.bmp) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
@@ -353,13 +367,28 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_3/foreman_qcif_{id}_y_before_quantized.176x144.bmp) | ![](./task_3/foreman_qcif_{id}_y_dequantized.176x144.bmp) |
 | On Cb plane | ![](./task_3/foreman_qcif_{id}_cb_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_{id}_cb_dequantized.88x72.bmp)  |
 | On Cr plane | ![](./task_3/foreman_qcif_{id}_cr_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_{id}_cr_dequantized.88x72.bmp)  |
+'''
+    for id in range(3)
+)}
+### Statistical Comparison
+{"".join(
+        f'''
+The image pair with sequence number `{id}`:
 
-"""
-        for id in range(3)
-    )
-)
-print(
-    """\
+On the Y plane:
+
+{get_metrics_report(images_as_ycbcr[id][0], images_as_ycbcr_dequantized[id][0])}
+
+On the Cb plane:
+
+{get_metrics_report(images_as_ycbcr[id][1], images_as_ycbcr_dequantized[id][1])}
+
+On the Cr plane:
+
+{get_metrics_report(images_as_ycbcr[id][2], images_as_ycbcr_dequantized[id][2])}
+'''
+    for id in range(3)
+)}
 ### Details
 
 The process workflow is as follows.

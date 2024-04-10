@@ -234,7 +234,7 @@ with open(
 ################
 
 print(
-    """\
+    f"""\
 ## Task 2
 
 Convert the multiple images from RGB to YCbCr `4:2:0` color space
@@ -246,12 +246,8 @@ Display images.
 
 I added the up-sampled images for comparison purposes
 since they have the same size as the original ones.
-
-"""
-)
-print(
-    "".join(
-        f"""\
+{"".join(
+        f'''
 The images with sequence number `{id}` are displayed below.
 
 There are the images in the RGB color space below.
@@ -267,13 +263,9 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_2/foreman_qcif_{id}_y_without_subsampling.176x144.bmp)  | ![](./task_2/foreman_qcif_{id}_y_with_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_y_with_upsampling.176x144.bmp)  |
 | On Cb plane | ![](./task_2/foreman_qcif_{id}_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_{id}_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | ![](./task_2/foreman_qcif_{id}_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_{id}_cr_with_upsampling.176x144.bmp) |
-
-"""
-        for id in range(3)
-    )
-)
-print(
-    """\
+'''
+    for id in range(3)
+)}
 ### Statistical Comparison
 
 Compare between the images without sub-sampling and with sub-sampling
@@ -281,11 +273,8 @@ in the YCbCr color space.
 
 There are the metric results computed
 between the copied and transformed images below.
-"""
-)
-print(
-    "".join(
-        f"""\
+{"".join(
+        f'''
 The image pair with sequence number `{id}`:
 
 On the Y plane:
@@ -299,13 +288,9 @@ On the Cb plane:
 On the Cr plane:
 
 {get_metrics_report(images_as_ycbcr[id][2], images_as_ycbcr_upsampled[id][2])}
-
-"""
-        for id in range(3)
-    )
-)
-print(
-    """\
+'''
+    for id in range(3)
+)}
 ### Details
 
 The process workflow is as follows.

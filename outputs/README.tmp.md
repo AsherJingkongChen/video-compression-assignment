@@ -93,7 +93,6 @@ Display images.
 I added the up-sampled images for comparison purposes
 since they have the same size as the original ones.
 
-
 The images with sequence number `0` are displayed below.
 
 There are the images in the RGB color space below.
@@ -141,7 +140,6 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Y plane  | ![](./task_2/foreman_qcif_2_y_without_subsampling.176x144.bmp)  | ![](./task_2/foreman_qcif_2_y_with_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_2_y_with_upsampling.176x144.bmp)  |
 | On Cb plane | ![](./task_2/foreman_qcif_2_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_2_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_2_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | ![](./task_2/foreman_qcif_2_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_2_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_2_cr_with_upsampling.176x144.bmp) |
-
 
 ### Statistical Comparison
 
@@ -256,7 +254,6 @@ On the Cr plane:
  ['SSIM', '0.99982', '1.00000']]
 ```
 
-
 ### Details
 
 The process workflow is as follows.
@@ -370,15 +367,15 @@ I added assertion checks to ensure that
 the decoded images are equal to the quantized images.
 (See the module `src.tasks.quantize_and_encode_multi_frame_in_ycbcr420_and_back`)
 
-I added the re-exported images using `utils/YUVDisplay.exe`
-for comparison purposes since they have the same size as the original ones.
+I added the up-sampled images for comparison purposes
+since they have the same size as the original ones.
 
 The images with sequence number `0` are displayed below.
 
 There are the images in the RGB color space below.
 
-| Original Image | Transformed Image (YUVDisplay.exe) |
-| -------------- | ---------------------------------- |
+| Original Image | Transformed Image |
+| -------------- | ----------------- |
 | ![](../assets/foreman_qcif_0_rgb.bmp) | ![](./task_3/foreman_qcif_0_rgb_transformed.176x144.bmp) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
@@ -393,8 +390,8 @@ The images with sequence number `1` are displayed below.
 
 There are the images in the RGB color space below.
 
-| Original Image | Transformed Image (YUVDisplay.exe) |
-| -------------- | ---------------------------------- |
+| Original Image | Transformed Image |
+| -------------- | ----------------- |
 | ![](../assets/foreman_qcif_1_rgb.bmp) | ![](./task_3/foreman_qcif_1_rgb_transformed.176x144.bmp) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
@@ -409,8 +406,8 @@ The images with sequence number `2` are displayed below.
 
 There are the images in the RGB color space below.
 
-| Original Image | Transformed Image (YUVDisplay.exe) |
-| -------------- | ---------------------------------- |
+| Original Image | Transformed Image |
+| -------------- | ----------------- |
 | ![](../assets/foreman_qcif_2_rgb.bmp) | ![](./task_3/foreman_qcif_2_rgb_transformed.176x144.bmp) |
 
 There are images in the YCbCr color space re-mapped to the grayscale color space below.
@@ -421,6 +418,112 @@ There are images in the YCbCr color space re-mapped to the grayscale color space
 | On Cb plane | ![](./task_3/foreman_qcif_2_cb_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_2_cb_dequantized.88x72.bmp)  |
 | On Cr plane | ![](./task_3/foreman_qcif_2_cr_before_quantized.88x72.bmp)  | ![](./task_3/foreman_qcif_2_cr_dequantized.88x72.bmp)  |
 
+### Statistical Comparison
+
+The image pair with sequence number `0`:
+
+On the Y plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '7.39583', '0.00000'],
+ ['MSE', '68.90554', '0.00000'],
+ ['NRMSE', '0.04882', '0.00000'],
+ ['PSNR', '29.74826', 'inf'],
+ ['SSIM', '0.93219', '1.00000']]
+```
+
+On the Cb plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '6.20739', '0.00000'],
+ ['MSE', '54.14331', '0.00000'],
+ ['NRMSE', '0.06166', '0.00000'],
+ ['PSNR', '30.79536', 'inf'],
+ ['SSIM', '0.91321', '1.00000']]
+```
+
+On the Cr plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '5.69776', '0.00000'],
+ ['MSE', '48.57812', '0.00000'],
+ ['NRMSE', '0.05172', '0.00000'],
+ ['PSNR', '31.26640', 'inf'],
+ ['SSIM', '0.92156', '1.00000']]
+```
+
+The image pair with sequence number `1`:
+
+On the Y plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '7.42551', '0.00000'],
+ ['MSE', '69.23674', '0.00000'],
+ ['NRMSE', '0.04901', '0.00000'],
+ ['PSNR', '29.72744', 'inf'],
+ ['SSIM', '0.93298', '1.00000']]
+```
+
+On the Cb plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '6.22617', '0.00000'],
+ ['MSE', '54.61695', '0.00000'],
+ ['NRMSE', '0.06194', '0.00000'],
+ ['PSNR', '30.75753', 'inf'],
+ ['SSIM', '0.91339', '1.00000']]
+```
+
+On the Cr plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '5.70849', '0.00000'],
+ ['MSE', '48.54467', '0.00000'],
+ ['NRMSE', '0.05167', '0.00000'],
+ ['PSNR', '31.26939', 'inf'],
+ ['SSIM', '0.92171', '1.00000']]
+```
+
+The image pair with sequence number `2`:
+
+On the Y plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '7.41020', '0.00000'],
+ ['MSE', '69.00994', '0.00000'],
+ ['NRMSE', '0.04898', '0.00000'],
+ ['PSNR', '29.74169', 'inf'],
+ ['SSIM', '0.93281', '1.00000']]
+```
+
+On the Cb plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '6.23658', '0.00000'],
+ ['MSE', '55.15199', '0.00000'],
+ ['NRMSE', '0.06224', '0.00000'],
+ ['PSNR', '30.71519', 'inf'],
+ ['SSIM', '0.90988', '1.00000']]
+```
+
+On the Cr plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '5.77383', '0.00000'],
+ ['MSE', '49.73122', '0.00000'],
+ ['NRMSE', '0.05226', '0.00000'],
+ ['PSNR', '31.16451', 'inf'],
+ ['SSIM', '0.92437', '1.00000']]
+```
 
 ### Details
 
