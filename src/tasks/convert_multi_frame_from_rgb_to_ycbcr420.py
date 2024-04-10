@@ -23,6 +23,10 @@ images_data_as_ycbcr: List[
     ]
 ] = []
 
+# The images will be saved in the memory for statistical comparison
+images_as_ycbcr: List[Tuple[Image.Image, Image.Image, Image.Image]] = []
+images_as_ycbcr_upsampled: List[Tuple[Image.Image, Image.Image, Image.Image]] = []
+
 # Uses ITU-T H.273 and ITU-R BT.601 parameter values
 # - The source image is assumed to be gamma-corrected RGB
 COLOR = H273()
@@ -168,6 +172,11 @@ for image_id in range(3):
         / f"foreman_qcif_{image_id}_cr_with_upsampling.{width}x{height}.bmp"
     )
 
+    images_as_ycbcr.append((image_y, image_cb, image_cr))
+    images_as_ycbcr_upsampled.append(
+        (image_y_upsampled, image_cb_upsampled, image_cr_upsampled)
+    )
+
 # Save the sub-sampled YCbCr image in the planar format (YUV420p)
 height, width = images_data_as_ycbcr[0][0].shape
 with open(
@@ -177,79 +186,83 @@ with open(
     for image_data_ycbcr in images_data_as_ycbcr:
         save_ycbcr_image(images_ycbcr, image_data_ycbcr)
 
-##################
-###  Analysis  ###
-##################
-
-
-
-
+################
+###  Report  ###
+################
 
 print(
     """\
 ## Task 2
 
 Convert the multiple images from RGB to YCbCr `4:2:0` color space
-and pack them into a planar format.
+and pack them into a file in planar format.
 
-### Comparison between the images with and without sub-sampling
+### Visual Comparison
 
-The sub-sampled images are re-mapped from YCbCr to grayscale color space
-for visualization purposes.
+Display images.
 
-The up-sampled images are for comparison purposes.
+I added the up-sampled images and re-exported ones using `utils/YUVDisplay.exe`
+for comparison purposes since they have the same size as the original ones.
 """
 )
 print(
     "".join(
         f"""\
-The original image `{id}` in the RGB color space:
+The images with sequence number `{id}` are displayed below.
 
-![](../assets/foreman_qcif_{id}_rgb.bmp)
+There are the images in the RGB color space below.
 
-The transformed image from `{id}` re-exported using `utils/YUVDisplay.exe`:
+| Original Image | Transformed Image (YUVDisplay.exe) |
+| -------------- | ---------------------------------- |
+| ![](./assets/foreman_qcif_{id}_rgb.bmp) | ![](./task_2/foreman_qcif_{id}_ycbcr.yuv420p.176x144.yuv.bmp) |
 
-![](./task_2/foreman_qcif_{id}_ycbcr.yuv420p.176x144.yuv.bmp)
-
-The transformed images on different Y, Cb and Cr planes
-from `{id}` in the grayscale colorspace:
+There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
 |             | Without sub-sampling | With sub-sampling | With up-sampling |
 | ----------- | -------------------- | ----------------- | ---------------- |
 | On Y plane  | ![](./task_2/foreman_qcif_{id}_y_without_subsampling.176x144.bmp)  | ![](./task_2/foreman_qcif_{id}_y_with_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_y_with_upsampling.176x144.bmp)  |
 | On Cb plane | ![](./task_2/foreman_qcif_{id}_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_{id}_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | ![](./task_2/foreman_qcif_{id}_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_{id}_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_{id}_cr_with_upsampling.176x144.bmp) |
-
 """
         for id in range(3)
     )
 )
 print(
-    f"""\
-Take the images with sequence number `2` to further comparison.
+    """\
+### Statistical Comparison
 
-Below are the comparison metrics,
-they are computed between the image without sub-sampling
-and the other one with sub-sampling and up-sampling in the YCbCr color space:
+Compare between the images without sub-sampling and with sub-sampling
+in the YCbCr color space.
 
-The image pair on Y plane:
-
-{get_metrics_report(image_y, image_y_upsampled)}
-
-The image pair on Cb plane:
-
-{get_metrics_report(image_cb, image_cb_upsampled)}
-
-The image pair on Cr plane:
-
-{get_metrics_report(image_cr, image_cr_upsampled)}
+There are the metric results computed
+between the copied and transformed images below.
 """
+)
+print(
+    "".join(
+        f"""\
+The image pair with sequence number `{id}`:
+
+On the Y plane:
+
+{get_metrics_report(images_as_ycbcr[id][0], images_as_ycbcr_upsampled[id][0])}
+
+On the Cb plane:
+
+{get_metrics_report(images_as_ycbcr[id][1], images_as_ycbcr_upsampled[id][1])}
+
+On the Cr plane:
+
+{get_metrics_report(images_as_ycbcr[id][2], images_as_ycbcr_upsampled[id][2])}
+"""
+        for id in range(3)
+    )
 )
 print(
     """\
 ### Details
 
-The workflow is as follows:
+The process workflow is as follows.
 
 ```mermaid
 graph LR

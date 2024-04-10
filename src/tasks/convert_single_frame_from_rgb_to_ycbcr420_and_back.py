@@ -198,14 +198,15 @@ Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
 Display images.
 
-There are the images in the RGB color space below; by the way,
-I added transformed images from YCbCr to RGB using `utils/YUVDisplay.exe`:
+I added transformed images from YCbCr to RGB using `utils/YUVDisplay.exe`.
+
+There are the images in the RGB color space below.
 
 | Copied Image | Transformed Image (Mine) | Transformed Image (YUVDisplay.exe) |
 | ------------ | ------------------------ | ---------------------------------- |
 | ![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp) | ![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp) | ![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp) |
 
-There are the images in the YCbCr color space re-mapped in the grayscale colorspace:
+There are the images in the YCbCr color space re-mapped to the grayscale colorspace below.
 
 |             | Before sub-sampling | After sub-sampling | After up-sampling |
 | ----------- | ------------------- | ------------------ | ----------------- |
@@ -218,13 +219,13 @@ There are the images in the YCbCr color space re-mapped in the grayscale colorsp
 Compare between the copied and transformed images in the RGB color space.
 
 There are the metric results computed
-between the copied and transformed images below:
+between the copied and transformed images below.
 
 {get_metrics_report(image_copied, image_transformed)}
 
 ### Details
 
-The workflow is as follows:
+The process workflow is as follows.
 
 ```mermaid
 graph LR

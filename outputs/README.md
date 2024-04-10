@@ -6,12 +6,32 @@ Convert an image from RGB to YCbCr `4:2:0` and recover it.
 
 *Assume that the copied image is equivalent to the original image.*
 
+### Visual Comparison
+
+Display images.
+
+I added transformed images from YCbCr to RGB using `utils/YUVDisplay.exe`.
+
+There are the images in the RGB color space below.
+
+| Copied Image | Transformed Image (Mine) | Transformed Image (YUVDisplay.exe) |
+| ------------ | ------------------------ | ---------------------------------- |
+| ![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp) | ![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp) | ![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp) |
+
+There are the images in the YCbCr color space re-mapped to the grayscale colorspace below.
+
+|             | Before sub-sampling | After sub-sampling | After up-sampling |
+| ----------- | ------------------- | ------------------ | ----------------- |
+| On Y plane  | ![](./task_1/foreman_qcif_0_y_default.176x144.bmp)  | ![](./task_1/foreman_qcif_0_y_subsampled.176x144.bmp) | ![](./task_1/foreman_qcif_0_y_upsampled.176x144.bmp)  |
+| On Cb plane | ![](./task_1/foreman_qcif_0_cb_default.176x144.bmp) | ![](./task_1/foreman_qcif_0_cb_subsampled.88x72.bmp)  | ![](./task_1/foreman_qcif_0_cb_upsampled.176x144.bmp) |
+| On Cr plane | ![](./task_1/foreman_qcif_0_cr_default.176x144.bmp) | ![](./task_1/foreman_qcif_0_cr_subsampled.88x72.bmp)  | ![](./task_1/foreman_qcif_0_cr_upsampled.176x144.bmp) |
+
 ### Statistical Comparison
 
 Compare between the copied and transformed images in the RGB color space.
 
 There are the metric results computed
-between the copied and transformed images below:
+between the copied and transformed images below.
 
 ```python
 [['<Metrics>', '<Score>', '<Goal>'],
@@ -22,87 +42,63 @@ between the copied and transformed images below:
  ['SSIM', '0.99853', '1.00000']]
 ```
 
-### Visual Comparison
-
-Display images.
-
-There are the images in the RGB color space below; by the way,
-I add transformed images from YCbCr to RGB using `utils/YUVDisplay.exe`:
-
-| Copied Image | Transformed Image (Mine) | Transformed Image (YUVDisplay.exe) |
-| ------------ | ------------------------ | ---------------------------------- |
-| ![](./task_1/foreman_qcif_0_rgb_copied.176x144.bmp) | ![](./task_1/foreman_qcif_0_rgb_transformed.176x144.bmp) | ![](./task_1/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp) |
-
-There are the images in the YCbCr color space re-mapped in the grayscale colorspace:
-
-|             | Before sub-sampling | After sub-sampling | After up-sampling |
-| ----------- | ------------------- | ------------------ | ----------------- |
-| On Y plane  | ![](./task_1/foreman_qcif_0_y_default.176x144.bmp)  | ![](./task_1/foreman_qcif_0_y_subsampled.176x144.bmp) | ![](./task_1/foreman_qcif_0_y_upsampled.176x144.bmp)  |
-| On Cb plane | ![](./task_1/foreman_qcif_0_cb_default.176x144.bmp) | ![](./task_1/foreman_qcif_0_cb_subsampled.88x72.bmp)  | ![](./task_1/foreman_qcif_0_cb_upsampled.176x144.bmp) |
-| On Cr plane | ![](./task_1/foreman_qcif_0_cr_default.176x144.bmp) | ![](./task_1/foreman_qcif_0_cr_subsampled.88x72.bmp)  | ![](./task_1/foreman_qcif_0_cr_upsampled.176x144.bmp) |
-
 ### Details
 
-The workflow is as follows:
+The process workflow is as follows.
 
 ![diagram](./README-1.svg)
 
 ## Task 2
 
 Convert the multiple images from RGB to YCbCr `4:2:0` color space
-and pack them into a planar format.
+and pack them into a file in planar format.
 
-### Comparison between the images with and without sub-sampling
+### Visual Comparison
 
-The sub-sampled images are re-mapped from YCbCr to grayscale color space
-for visualization purposes.
+Display images.
 
-The up-sampled images are for comparison purposes.
+I added the up-sampled images and re-exported ones using `utils/YUVDisplay.exe`
+for comparison purposes since they have the same size as the original ones.
 
-The original image `0` in the RGB color space:
+The images with sequence number `0` are displayed below.
 
-![](../assets/foreman_qcif_0_rgb.bmp)
+There are the images in the RGB color space below.
 
-The transformed image from `0` re-exported using `utils/YUVDisplay.exe`:
+| Original Image | Transformed Image (YUVDisplay.exe) |
+| -------------- | ---------------------------------- |
+| ![](./assets/foreman_qcif_0_rgb.bmp) | ![](./task_2/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp) |
 
-![](./task_2/foreman_qcif_0_ycbcr.yuv420p.176x144.yuv.bmp)
-
-The transformed images on different Y, Cb and Cr planes
-from `0` in the grayscale colorspace:
+There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
 |             | Without sub-sampling | With sub-sampling | With up-sampling |
 | ----------- | -------------------- | ----------------- | ---------------- |
 | On Y plane  | ![](./task_2/foreman_qcif_0_y_without_subsampling.176x144.bmp)  | ![](./task_2/foreman_qcif_0_y_with_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_0_y_with_upsampling.176x144.bmp)  |
 | On Cb plane | ![](./task_2/foreman_qcif_0_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_0_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_0_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | ![](./task_2/foreman_qcif_0_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_0_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_0_cr_with_upsampling.176x144.bmp) |
+The images with sequence number `1` are displayed below.
 
-The original image `1` in the RGB color space:
+There are the images in the RGB color space below.
 
-![](../assets/foreman_qcif_1_rgb.bmp)
+| Original Image | Transformed Image (YUVDisplay.exe) |
+| -------------- | ---------------------------------- |
+| ![](./assets/foreman_qcif_1_rgb.bmp) | ![](./task_2/foreman_qcif_1_ycbcr.yuv420p.176x144.yuv.bmp) |
 
-The transformed image from `1` re-exported using `utils/YUVDisplay.exe`:
-
-![](./task_2/foreman_qcif_1_ycbcr.yuv420p.176x144.yuv.bmp)
-
-The transformed images on different Y, Cb and Cr planes
-from `1` in the grayscale colorspace:
+There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
 |             | Without sub-sampling | With sub-sampling | With up-sampling |
 | ----------- | -------------------- | ----------------- | ---------------- |
 | On Y plane  | ![](./task_2/foreman_qcif_1_y_without_subsampling.176x144.bmp)  | ![](./task_2/foreman_qcif_1_y_with_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_1_y_with_upsampling.176x144.bmp)  |
 | On Cb plane | ![](./task_2/foreman_qcif_1_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_1_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_1_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | ![](./task_2/foreman_qcif_1_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_1_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_1_cr_with_upsampling.176x144.bmp) |
+The images with sequence number `2` are displayed below.
 
-The original image `2` in the RGB color space:
+There are the images in the RGB color space below.
 
-![](../assets/foreman_qcif_2_rgb.bmp)
+| Original Image | Transformed Image (YUVDisplay.exe) |
+| -------------- | ---------------------------------- |
+| ![](./assets/foreman_qcif_2_rgb.bmp) | ![](./task_2/foreman_qcif_2_ycbcr.yuv420p.176x144.yuv.bmp) |
 
-The transformed image from `2` re-exported using `utils/YUVDisplay.exe`:
-
-![](./task_2/foreman_qcif_2_ycbcr.yuv420p.176x144.yuv.bmp)
-
-The transformed images on different Y, Cb and Cr planes
-from `2` in the grayscale colorspace:
+There are images in the YCbCr color space re-mapped to the grayscale color space below.
 
 |             | Without sub-sampling | With sub-sampling | With up-sampling |
 | ----------- | -------------------- | ----------------- | ---------------- |
@@ -110,14 +106,17 @@ from `2` in the grayscale colorspace:
 | On Cb plane | ![](./task_2/foreman_qcif_2_cb_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_2_cb_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_2_cb_with_upsampling.176x144.bmp) |
 | On Cr plane | ![](./task_2/foreman_qcif_2_cr_without_subsampling.176x144.bmp) | ![](./task_2/foreman_qcif_2_cr_with_subsampling.88x72.bmp)  | ![](./task_2/foreman_qcif_2_cr_with_upsampling.176x144.bmp) |
 
+### Statistical Comparison
 
-Take the images with sequence number `2` to further comparison.
+Compare between the images without sub-sampling and with sub-sampling
+in the YCbCr color space.
 
-Below are the comparison metrics,
-they are computed between the image without sub-sampling
-and the other one with sub-sampling and up-sampling in the YCbCr color space:
+There are the metric results computed
+between the copied and transformed images below.
 
-The image pair on Y plane:
+The image pair with sequence number `0`:
+
+On the Y plane:
 
 ```python
 [['<Metrics>', '<Score>', '<Goal>'],
@@ -128,7 +127,75 @@ The image pair on Y plane:
  ['SSIM', '1.00000', '1.00000']]
 ```
 
-The image pair on Cb plane:
+On the Cb plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '0.01610', '0.00000'],
+ ['MSE', '0.04553', '0.00000'],
+ ['NRMSE', '0.00179', '0.00000'],
+ ['PSNR', '61.54750', 'inf'],
+ ['SSIM', '0.99981', '1.00000']]
+```
+
+On the Cr plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '0.02233', '0.00000'],
+ ['MSE', '0.22230', '0.00000'],
+ ['NRMSE', '0.00350', '0.00000'],
+ ['PSNR', '54.66139', 'inf'],
+ ['SSIM', '0.99976', '1.00000']]
+```
+The image pair with sequence number `1`:
+
+On the Y plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '0.00000', '0.00000'],
+ ['MSE', '0.00000', '0.00000'],
+ ['NRMSE', '0.00000', '0.00000'],
+ ['PSNR', 'inf', 'inf'],
+ ['SSIM', '1.00000', '1.00000']]
+```
+
+On the Cb plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '0.01172', '0.00000'],
+ ['MSE', '0.04076', '0.00000'],
+ ['NRMSE', '0.00169', '0.00000'],
+ ['PSNR', '62.02855', 'inf'],
+ ['SSIM', '0.99988', '1.00000']]
+```
+
+On the Cr plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '0.02225', '0.00000'],
+ ['MSE', '0.21607', '0.00000'],
+ ['NRMSE', '0.00345', '0.00000'],
+ ['PSNR', '54.78492', 'inf'],
+ ['SSIM', '0.99980', '1.00000']]
+```
+The image pair with sequence number `2`:
+
+On the Y plane:
+
+```python
+[['<Metrics>', '<Score>', '<Goal>'],
+ ['MAE', '0.00000', '0.00000'],
+ ['MSE', '0.00000', '0.00000'],
+ ['NRMSE', '0.00000', '0.00000'],
+ ['PSNR', 'inf', 'inf'],
+ ['SSIM', '1.00000', '1.00000']]
+```
+
+On the Cb plane:
 
 ```python
 [['<Metrics>', '<Score>', '<Goal>'],
@@ -139,7 +206,7 @@ The image pair on Cb plane:
  ['SSIM', '0.99984', '1.00000']]
 ```
 
-The image pair on Cr plane:
+On the Cr plane:
 
 ```python
 [['<Metrics>', '<Score>', '<Goal>'],
@@ -152,7 +219,7 @@ The image pair on Cr plane:
 
 ### Details
 
-The workflow is as follows:
+The process workflow is as follows.
 
 ![diagram](./README-2.svg)
 
