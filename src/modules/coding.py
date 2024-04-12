@@ -36,10 +36,9 @@ class HuffmanTree(Generic[_T]):
         ## Returns
         - A Huffman tree
         """
-        from heapq import heapify, heappush, heappop
+        from heapq import heappush, heappop
 
         values = sorted(map(lambda args: HuffmanTree(*args), values))
-        heapify(values)
 
         while len(values) > 1:
             heappush(values, (heappop(values)) + heappop(values))
